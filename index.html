@@ -434,11 +434,6 @@
     /* Quick actions */
     .quick-actions {
       display: grid;
-      /* Display all quick actions on a single row.  There are four buttons
-         (Add Expense, Add Income, Export and Settings) so we explicitly
-         create four equal columns.  This prevents wrapping on wider
-         screens and aligns with the requirement for four columns on
-         desktop/tablet layouts. */
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
       margin-bottom: 24px;
@@ -492,45 +487,6 @@
       color: var(--text-secondary-dark);
     }
     body.light .action-label { color: var(--text-secondary-light); }
-
-    /*
-      Horizontal back bar used on non‑dashboard pages.  Instead of the
-      floating circular button from the previous design, the back bar
-      sits underneath the greeting panel and provides both an icon and
-      a descriptive label.  It uses the same glassmorphism backdrop as
-      other cards to maintain visual cohesion.  Adjust padding and
-      spacing so it does not overlap other elements.  The bar uses
-      `cursor: pointer` to indicate interactivity.
-    */
-    .back-bar {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 16px;
-      margin-bottom: 16px;
-      border-radius: 12px;
-      background: var(--glass-bg-dark);
-      border: 1px solid var(--glass-border-dark);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      cursor: pointer;
-      width: fit-content;
-    }
-    .back-bar i {
-      font-size: 16px;
-      color: var(--primary-gradient);
-    }
-    .back-bar span {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-secondary-dark);
-    }
-    body.light .back-bar {
-      background: var(--glass-bg-light);
-      border-color: var(--glass-border-light);
-    }
-    body.light .back-bar span {
-      color: var(--text-secondary-light);
-    }
 
     /* AI insights */
     .ai-insights {
@@ -747,16 +703,6 @@
       opacity: 1;
       visibility: visible;
     }
-
-/*
-  In light mode the navigation overlay should not darken the UI.  Use a
-  semi‑transparent white overlay instead of the default black.  This
-  rule overrides the base overlay background defined above when
-  `body.light` is present.
-*/
-body.light .nav-overlay {
-  background: rgba(255, 255, 255, 0.4);
-}
     .estimation-card:hover {
       transform: translateY(-2px);
     }
@@ -1367,26 +1313,6 @@ body.light .nav-overlay {
       </div>
     </div>
 
-    <!-- Quick Actions Section (moved above AI Insights) -->
-    <div class="quick-actions" data-page="dashboard">
-      <div class="action-btn" id="quickAddExpense">
-        <i class="fas fa-minus action-icon"></i>
-        <span class="action-label">Add Expense</span>
-      </div>
-      <div class="action-btn" id="quickAddIncome">
-        <i class="fas fa-plus action-icon"></i>
-        <span class="action-label">Add Income</span>
-      </div>
-      <div class="action-btn" id="quickExport">
-        <i class="fas fa-download action-icon"></i>
-        <span class="action-label">Export</span>
-      </div>
-      <div class="action-btn" id="quickSettings">
-        <i class="fas fa-gear action-icon"></i>
-        <span class="action-label">Settings</span>
-      </div>
-    </div>
-
     <!-- AI Insights Card (moved below Balance Card) -->
     <div class="ai-insights" data-page="dashboard">
       <div class="ai-header">
@@ -1406,6 +1332,25 @@ body.light .nav-overlay {
       </div>
       <div id="budgetCards"></div>
     </div>
+    <!-- Quick Actions -->
+    <div class="quick-actions" data-page="dashboard">
+      <div class="action-btn" id="quickAddExpense">
+        <i class="fas fa-minus action-icon"></i>
+        <span class="action-label">Add Expense</span>
+      </div>
+      <div class="action-btn" id="quickAddIncome">
+        <i class="fas fa-plus action-icon"></i>
+        <span class="action-label">Add Income</span>
+      </div>
+      <div class="action-btn" id="quickExport">
+        <i class="fas fa-download action-icon"></i>
+        <span class="action-label">Export</span>
+      </div>
+      <div class="action-btn" id="quickSettings">
+        <i class="fas fa-gear action-icon"></i>
+        <span class="action-label">Settings</span>
+      </div>
+    </div>
     <!-- AI Insights Card relocated above.  Original position hidden to avoid duplicate IDs. -->
     <!-- <div class="ai-insights" style="display:none;"><div class="ai-header"><div class="ai-icon"><i class="fas fa-lightbulb"></i></div><div class="ai-title" id="aiTitle">AI Insights</div></div><div id="insightsList"></div></div> -->
     <!-- Charts & Estimation Section -->
@@ -1417,11 +1362,6 @@ body.light .nav-overlay {
       the current month.
     -->
     <div id="chartsSection" class="charts-section" data-page="charts">
-      <!-- Back bar for charts page -->
-      <div class="back-bar" id="chartsBackBar">
-        <i class="fas fa-arrow-left"></i>
-        <span>Back to Dashboard</span>
-      </div>
       <h3 class="section-title" id="chartsTitle">Financial Charts</h3>
       <div class="chart-grid">
         <div class="chart-card">
@@ -1448,11 +1388,6 @@ body.light .nav-overlay {
 
     <!-- Transactions Section -->
     <div class="transactions-section" data-page="transactions">
-      <!-- Back bar for transactions page -->
-      <div class="back-bar" id="transactionsBackBar">
-        <i class="fas fa-arrow-left"></i>
-        <span>Back to Dashboard</span>
-      </div>
       <div class="transactions-header">
         <h2 class="section-title" id="transactionsTitle">Recent Transactions</h2>
       </div>
@@ -1742,7 +1677,6 @@ body.light .nav-overlay {
           addExpense: 'Add Expense',
           addIncome: 'Add Income',
           export: 'Export',
-          exportCsv: 'Export CSV',
           settings: 'Settings',
           aiInsights: 'AI Insights',
           recentTransactions: 'Recent Transactions',
@@ -1781,7 +1715,6 @@ body.light .nav-overlay {
           addExpense: 'Tambah Pengeluaran',
           addIncome: 'Tambah Pemasukan',
           export: 'Ekspor',
-          exportCsv: 'Ekspor CSV',
           settings: 'Pengaturan',
           aiInsights: 'Wawasan AI',
           recentTransactions: 'Transaksi Terbaru',
@@ -2451,26 +2384,6 @@ body.light .nav-overlay {
       window.closeSettingsModal = closeSettingsModal;
       window.navigateTo = navigateTo;
 
-      //
-      // Reposition quick actions above the AI insights panel on the dashboard.
-      // The original markup places the quick actions after the budget goals,
-      // which pushes them far down the page.  For easier access we move the
-      // `.quick-actions` element before the `.ai-insights` element at runtime.
-      // This helper is idempotent and will only reposition if necessary.
-      function repositionQuickActions() {
-        const ai = document.querySelector('.ai-insights[data-page="dashboard"]');
-        const qa = document.querySelector('.quick-actions[data-page="dashboard"]');
-        if (ai && qa && ai.parentNode) {
-          // If quick actions are not already immediately before AI insights,
-          // insert them there.
-          if (qa.nextElementSibling !== ai) {
-            ai.parentNode.insertBefore(qa, ai);
-          }
-        }
-      }
-      // Expose repositionQuickActions globally so it can be called from other scopes
-      window.repositionQuickActions = repositionQuickActions;
-
       /* ----- Event Handlers ----- */
       function handleTransactionSave() {
         const type = document.getElementById('transactionType').value;
@@ -2530,39 +2443,14 @@ body.light .nav-overlay {
           document.getElementById('transactionType').value = 'income';
         });
         document.getElementById('quickExport').addEventListener('click', () => {
-          // Ask the user which format to export.  If they confirm, a CSV
-          // file will be generated; otherwise, a JSON backup is created.
-          const msg = settings.language === 'en'
-            ? 'Export as CSV?\nClick Cancel for JSON.'
-            : 'Ekspor sebagai CSV?\nKlik Batal untuk JSON.';
-          const asCsv = confirm(msg);
-          if (asCsv) {
-            // Build CSV string with a header row.  Description fields are
-            // enclosed in double quotes and any quotes inside are
-            // doubled to escape them.  This allows spreadsheet
-            // applications to parse the file correctly.
-            let csv = 'id,type,amount,category,description,date\n';
-            transactions.forEach(tx => {
-              const desc = (tx.description || '').replace(/"/g, '""');
-              csv += `${tx.id},${tx.type},${tx.amount},${tx.category},"${desc}",${tx.date}\n`;
-            });
-            const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'transactions.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-          } else {
-            const data = JSON.stringify(transactions);
-            const blob = new Blob([data], { type:'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'transactions.json';
-            a.click();
-            URL.revokeObjectURL(url);
-          }
+          const data = JSON.stringify(transactions);
+          const blob = new Blob([data], { type:'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'transactions.json';
+          a.click();
+          URL.revokeObjectURL(url);
         });
         document.getElementById('quickSettings').addEventListener('click', openSettingsModal);
         // The floating add button has been replaced by the navigation menu.  If it still exists, hide it.
@@ -2631,20 +2519,6 @@ body.light .nav-overlay {
               updateGreeting();
               closeSettingsModal();
             });
-          });
-        }
-
-        // Back bars: clicking on the horizontal back bar navigates to the dashboard.
-        const chartsBackBar = document.getElementById('chartsBackBar');
-        if (chartsBackBar) {
-          chartsBackBar.addEventListener('click', () => {
-            navigateTo('dashboard');
-          });
-        }
-        const transactionsBackBar = document.getElementById('transactionsBackBar');
-        if (transactionsBackBar) {
-          transactionsBackBar.addEventListener('click', () => {
-            navigateTo('dashboard');
           });
         }
         // Clicking outside modal closes it
@@ -2774,8 +2648,6 @@ body.light .nav-overlay {
         renderCharts();
         // Default to dashboard page on initial load
         navigateTo('dashboard');
-        // Move quick actions above AI insights after initial render
-        if (typeof repositionQuickActions === 'function') repositionQuickActions();
         initEventListeners();
         // Update greeting every minute
         setInterval(updateGreeting, 60000);
@@ -2844,23 +2716,11 @@ body.light .nav-overlay {
         yesBtn.onclick = null;
         noBtn.onclick = null;
         yesBtn.onclick = () => {
-          // Close the confirmation modal and perform the confirmed action
           closeConfirmModal();
           if (typeof onConfirm === 'function') onConfirm();
-          // After confirming, always navigate back to the dashboard and
-          // reposition quick actions to ensure the UI is fully restored.
-          if (typeof navigateTo === 'function') navigateTo('dashboard');
-          if (typeof repositionQuickActions === 'function') repositionQuickActions();
         };
         noBtn.onclick = () => {
-          // Close the confirmation modal.  Navigating back to the dashboard
-          // ensures that any residual overlays or blurred backgrounds
-          // introduced by the confirmation are removed.  Without this the
-          // user may be left staring at a dimmed page with only the
-          // greeting visible (see bug report #8).
           closeConfirmModal();
-          if (typeof navigateTo === 'function') navigateTo('dashboard');
-          if (typeof repositionQuickActions === 'function') repositionQuickActions();
         };
         openConfirmModal();
       }
@@ -2918,11 +2778,6 @@ body.light .nav-overlay {
           renderTransactions();
           generateInsights();
           renderCharts();
-          // After a successful email/password login always return to the
-          // dashboard so the user starts from a known state.  Also
-          // reposition the quick actions in case the DOM has changed.
-          navigateTo('dashboard');
-          if (typeof repositionQuickActions === 'function') repositionQuickActions();
         } else {
           // Show a themed alert rather than the native browser alert
           const msg = settings.language === 'en' ? 'Invalid credentials' : 'Email atau kata sandi salah';
@@ -2959,11 +2814,6 @@ body.light .nav-overlay {
           renderTransactions();
           generateInsights();
           renderCharts();
-          // After a successful Google login return to the dashboard and
-          // reposition the quick actions for accessibility.  Without this the
-          // previous page (e.g. charts or transactions) may remain visible.
-          navigateTo('dashboard');
-          if (typeof repositionQuickActions === 'function') repositionQuickActions();
         } catch (error) {
           console.error('Google sign-in error', error);
           // Display the error using our custom alert panel
@@ -2990,10 +2840,6 @@ body.light .nav-overlay {
         renderTransactions();
         generateInsights();
         renderCharts();
-        // After entering guest mode ensure the dashboard is displayed and
-        // reposition quick actions so they appear above AI insights.
-        navigateTo('dashboard');
-        if (typeof repositionQuickActions === 'function') repositionQuickActions();
       }
 
       // Log the user out of the current session.  When invoked, this will sign
@@ -3010,20 +2856,13 @@ body.light .nav-overlay {
         }
         currentUser = null;
         isGuestMode = true;
-        // Reset basic user settings so that a subsequent session starts fresh
-        settings.name = 'Guest';
-        settings.avatar = 'user';
-        settings.googlePhotoURL = null;
-        // Remove any stored user or guest session flags
+        // Remove any stored user session
         localStorage.removeItem('enhanced_user');
         localStorage.removeItem('enhanced_guest');
-        // Clear all persisted budgets and transaction data so no previous
-        // user data leaks into the new session
-        Object.keys(localStorage).forEach(key => {
-          if (key.startsWith('ebt_transactions') || key.startsWith('ebt_settings')) {
-            localStorage.removeItem(key);
-          }
-        });
+        // Clear Google photo URL from settings
+        if (settings.googlePhotoURL) {
+          delete settings.googlePhotoURL;
+        }
         await loadState();
         setTheme(settings.theme);
         setLanguage(settings.language);
@@ -3033,9 +2872,6 @@ body.light .nav-overlay {
         renderTransactions();
         generateInsights();
         renderCharts();
-        // Always return to the dashboard after logout and reposition quick actions
-        navigateTo('dashboard');
-        if (typeof repositionQuickActions === 'function') repositionQuickActions();
         // Prompt the user to sign in again or continue as guest
         openLoginModal();
       }
