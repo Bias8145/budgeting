@@ -1483,6 +1483,8 @@
       <button class="nav-item" data-target="dashboard" title="Dashboard"><i class="fas fa-home"></i></button>
       <button class="nav-item" data-target="transactions" title="Transactions"><i class="fas fa-list"></i></button>
       <button class="nav-item" data-target="charts" title="Charts"><i class="fas fa-chart-line"></i></button>
+      <!-- Logout button; uses the same nav-item style for consistency -->
+      <button class="nav-item" id="logoutBtn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
     </div>
   </div>
   <!-- Overlay that blurs the content when navigation menu is open -->
@@ -1771,41 +1773,49 @@
       /* ----- Persistence ----- */
       // Load state from Firestore for logged‑in users, otherwise from localStorage.  Returns a promise.
       async function loadState() {
+        // Always begin by loading from localStorage.  Determine a key suffix
+        // based on the current user's email if present.  Guests use the base keys.
+        let userKey = '';
+        if (currentUser && !isGuestMode && currentUser.email) {
+          userKey = '_' + currentUser.email;
+        }
+        const localTx = localStorage.getItem('ebt_transactions' + userKey);
+        transactions = localTx ? JSON.parse(localTx) : [];
+        const localSettings = localStorage.getItem('ebt_settings' + userKey);
+        if (localSettings) {
+          const parsed = JSON.parse(localSettings);
+          settings = { ...settings, ...parsed };
+        }
+        // If logged in (non guest), attempt to load data from Firestore.
         if (currentUser && !isGuestMode) {
           try {
             const docRef = doc(db, 'users', currentUser.uid);
             const snap = await getDoc(docRef);
             if (snap.exists()) {
               const data = snap.data();
-              transactions = Array.isArray(data.transactions) ? data.transactions : [];
-              // Merge Firestore settings into current settings; budgets and other fields preserved
-              settings = { ...settings, ...(data.settings || {}) };
-            } else {
-              transactions = [];
+              if (Array.isArray(data.transactions)) {
+                transactions = data.transactions;
+              }
+              if (data.settings) {
+                settings = { ...settings, ...data.settings };
+              }
             }
           } catch (err) {
             console.error('Error loading from Firestore', err);
-            // fall back to localStorage
-            const storedTx = localStorage.getItem('ebt_transactions');
-            transactions = storedTx ? JSON.parse(storedTx) : [];
-            const storedSettings = localStorage.getItem('ebt_settings');
-            if (storedSettings) settings = { ...settings, ...JSON.parse(storedSettings) };
-          }
-        } else {
-          // guest or offline user: use localStorage
-          let keyPrefix = 'ebt_transactions';
-          if (currentUser && !isGuestMode && currentUser.email) keyPrefix += '_' + currentUser.email;
-          const storedTx = localStorage.getItem(keyPrefix);
-          transactions = storedTx ? JSON.parse(storedTx) : [];
-          const storedSettings = localStorage.getItem('ebt_settings');
-          if (storedSettings) {
-            const parsed = JSON.parse(storedSettings);
-            settings = { ...settings, ...parsed };
+            // If Firestore fails, the previously loaded local state remains.
           }
         }
       }
       // Save transactions to Firestore for logged‑in users, otherwise to localStorage
       async function saveTransactions() {
+        // Always persist transactions to localStorage using a key that includes the
+        // user email when available.  This provides a reliable fallback if
+        // Firestore writes fail or are restricted by security rules.
+        let userKey = '';
+        if (currentUser && !isGuestMode && currentUser.email) {
+          userKey = '_' + currentUser.email;
+        }
+        localStorage.setItem('ebt_transactions' + userKey, JSON.stringify(transactions));
         if (currentUser && !isGuestMode) {
           try {
             // Save both transactions and settings together to reduce writes
@@ -1813,22 +1823,24 @@
           } catch (err) {
             console.error('Error saving transactions to Firestore', err);
           }
-        } else {
-          let keyPrefix = 'ebt_transactions';
-          if (currentUser && !isGuestMode && currentUser.email) keyPrefix += '_' + currentUser.email;
-          localStorage.setItem(keyPrefix, JSON.stringify(transactions));
         }
       }
       // Save settings to Firestore for logged‑in users, otherwise to localStorage
       async function saveSettings() {
+        // Always save settings locally under a key that incorporates the
+        // user's email when available.  This ensures settings persist
+        // across reloads even if Firestore rejects writes.
+        let userKey = '';
+        if (currentUser && !isGuestMode && currentUser.email) {
+          userKey = '_' + currentUser.email;
+        }
+        localStorage.setItem('ebt_settings' + userKey, JSON.stringify(settings));
         if (currentUser && !isGuestMode) {
           try {
             await setDoc(doc(db, 'users', currentUser.uid), { settings }, { merge: true });
           } catch (err) {
             console.error('Error saving settings to Firestore', err);
           }
-        } else {
-          localStorage.setItem('ebt_settings', JSON.stringify(settings));
         }
       }
 
@@ -1907,6 +1919,14 @@
         // Update Reset Data button text if it exists
         const resetBtn = document.getElementById('resetDataBtn');
         if (resetBtn) resetBtn.textContent = t.resetData;
+
+        // Update logout button tooltip.  The logout button is icon-only,
+        // so we use its title attribute for localisation.  If the button
+        // exists, set its title based on the current language.
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.title = settings.language === 'en' ? 'Logout' : 'Keluar';
+        }
       }
 
       function updateGreeting() {
@@ -1929,9 +1949,16 @@
       // unknown avatar is selected, defaults to 'user'.
       function updateAvatar() {
         const avatarEl = document.getElementById('profileAvatar');
-        const key = settings.avatar || 'user';
-        const icon = AVATAR_ICONS[key] || AVATAR_ICONS.user;
-        avatarEl.innerHTML = `<i class="fas ${icon}"></i>`;
+        // If a Google photo URL exists, use it as the avatar.  We wrap the image
+        // in a circle to match the existing design.  Otherwise fall back to
+        // the selected FontAwesome icon.
+        if (settings.googlePhotoURL) {
+          avatarEl.innerHTML = `<img src="${settings.googlePhotoURL}" alt="avatar" style="width:100%; height:100%; border-radius:50%;">`;
+        } else {
+          const key = settings.avatar || 'user';
+          const icon = AVATAR_ICONS[key] || AVATAR_ICONS.user;
+          avatarEl.innerHTML = `<i class="fas ${icon}"></i>`;
+        }
       }
 
       /* ----- Transaction Operations ----- */
@@ -2289,11 +2316,36 @@
           container.appendChild(group);
         });
         document.getElementById('settingsModal').classList.add('active');
-        // Highlight currently selected avatar
-        const avatarOptions = document.querySelectorAll('#avatarOptions .avatar-option');
-        avatarOptions.forEach(opt => {
-          opt.classList.toggle('selected', opt.dataset.avatar === settings.avatar);
-        });
+        // Determine if the current user signed in via Google.  If so,
+        // hide the avatar selection and show an informational message that
+        // the avatar comes from the Google profile.  Otherwise show the
+        // avatar options and highlight the selected one.
+        const avatarContainer = document.getElementById('avatarOptions');
+        const avatarGroup = avatarContainer ? avatarContainer.parentElement : null;
+        const msgId = 'googleAvatarMsg';
+        let msgEl = document.getElementById(msgId);
+        const isGoogleLogin = currentUser && !isGuestMode && currentUser.providerData && currentUser.providerData.some(p => p.providerId === 'google.com');
+        if (isGoogleLogin && settings.googlePhotoURL) {
+          if (avatarContainer) avatarContainer.style.display = 'none';
+          if (!msgEl) {
+            msgEl = document.createElement('p');
+            msgEl.id = msgId;
+            msgEl.style.fontSize = '12px';
+            msgEl.style.marginTop = '8px';
+            msgEl.style.color = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary-dark');
+            if (avatarGroup) avatarGroup.appendChild(msgEl);
+          }
+          msgEl.textContent = settings.language === 'en'
+            ? 'Avatar is taken from your Google profile'
+            : 'Avatar Anda diambil dari profil Google';
+        } else {
+          if (avatarContainer) avatarContainer.style.display = 'flex';
+          if (msgEl) msgEl.remove();
+          const avatarOptions = document.querySelectorAll('#avatarOptions .avatar-option');
+          avatarOptions.forEach(opt => {
+            opt.classList.toggle('selected', opt.dataset.avatar === settings.avatar);
+          });
+        }
       }
       function closeSettingsModal() {
         document.getElementById('settingsModal').classList.remove('active');
@@ -2486,6 +2538,13 @@
         const avatarOptions = document.querySelectorAll('#avatarOptions .avatar-option');
         avatarOptions.forEach(opt => {
           opt.addEventListener('click', () => {
+            // If the avatar is tied to a Google profile, prevent manual selection
+            if (settings.googlePhotoURL) {
+              openAlert(settings.language === 'en'
+                ? 'Your avatar is set by your Google profile.'
+                : 'Avatar Anda diatur oleh profil Google Anda.');
+              return;
+            }
             // Remove selected class from all and add to clicked
             avatarOptions.forEach(o => o.classList.remove('selected'));
             opt.classList.add('selected');
@@ -2493,6 +2552,27 @@
             settings.avatar = opt.dataset.avatar;
           });
         });
+
+        // Logout button event
+        const logoutBtnEl = document.getElementById('logoutBtn');
+        if (logoutBtnEl) {
+          logoutBtnEl.addEventListener('click', () => {
+            // Close the navigation menu before showing the confirmation.  When the menu
+            // remains open it can partially obscure the confirm buttons.
+            const navMenuEl = document.getElementById('navMenu');
+            const navOverlayEl = document.getElementById('navOverlay');
+            if (navMenuEl && navOverlayEl) {
+              navMenuEl.classList.remove('open');
+              navOverlayEl.classList.remove('show');
+            }
+            const message = settings.language === 'en'
+              ? 'Are you sure you want to log out?'
+              : 'Anda yakin ingin keluar?';
+            showConfirm(message, async () => {
+              await handleLogout();
+            });
+          });
+        }
 
         // Bind Edit Budgets button to open settings modal
         const editBudBtn = document.getElementById('viewAllBudgets');
@@ -2591,13 +2671,21 @@
           currentUser = user;
           isGuestMode = false;
           settings.name = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
+          // Save Google photo URL if available
+          settings.googlePhotoURL = user.photoURL || null;
           // Persist user info locally
           localStorage.setItem('enhanced_user', JSON.stringify({ uid: user.uid, email: user.email }));
           localStorage.removeItem('enhanced_guest');
           await loadState();
+          // Restore Google photo after loading state
+          settings.googlePhotoURL = user.photoURL || settings.googlePhotoURL || null;
+          // Persist updated settings
+          await saveSettings();
         } else {
           currentUser = null;
           isGuestMode = true;
+          // Clear Google photo when signed out
+          settings.googlePhotoURL = null;
           await loadState();
         }
         // Regardless of auth state, refresh UI
@@ -2675,6 +2763,8 @@
           currentUser = user;
           isGuestMode = false;
           settings.name = email.split('@')[0];
+          // Clear any Google photo when logging in via email/password
+          settings.googlePhotoURL = null;
           localStorage.setItem('enhanced_user', JSON.stringify(user));
           localStorage.removeItem('enhanced_guest');
           closeLoginModal();
@@ -2702,12 +2792,20 @@
           const user = result.user;
           currentUser = user;
           isGuestMode = false;
+          // Use either the displayName or email prefix as the user's name
           settings.name = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
+          // Store the Google profile photo so that the avatar matches the account
+          settings.googlePhotoURL = user.photoURL || null;
           // Persist sign in across reloads
           localStorage.setItem('enhanced_user', JSON.stringify({ uid: user.uid, email: user.email }));
           localStorage.removeItem('enhanced_guest');
           closeLoginModal();
+          // Load any previously saved data.  After loadState returns, we
+          // explicitly restore the Google photo (loadState may reset it).
           await loadState();
+          settings.googlePhotoURL = user.photoURL || settings.googlePhotoURL || null;
+          // Persist settings (including googlePhotoURL) immediately
+          await saveSettings();
           setTheme(settings.theme);
           setLanguage(settings.language);
           updateGreeting();
@@ -2727,6 +2825,8 @@
         currentUser = null;
         isGuestMode = true;
         settings.name = 'Guest';
+        // Clear any Google photo when switching to guest mode
+        settings.googlePhotoURL = null;
         localStorage.setItem('enhanced_guest', 'true');
         localStorage.removeItem('enhanced_user');
         closeLoginModal();
@@ -2740,6 +2840,40 @@
         renderTransactions();
         generateInsights();
         renderCharts();
+      }
+
+      // Log the user out of the current session.  When invoked, this will sign
+      // out of Firebase (if a Google user), clear local session state and
+      // return the application to guest mode.  The UI is refreshed and the
+      // login modal is opened so the user can choose how to proceed.
+      async function handleLogout() {
+        try {
+          if (auth && auth.currentUser) {
+            await signOut(auth);
+          }
+        } catch (err) {
+          console.error('Logout error', err);
+        }
+        currentUser = null;
+        isGuestMode = true;
+        // Remove any stored user session
+        localStorage.removeItem('enhanced_user');
+        localStorage.removeItem('enhanced_guest');
+        // Clear Google photo URL from settings
+        if (settings.googlePhotoURL) {
+          delete settings.googlePhotoURL;
+        }
+        await loadState();
+        setTheme(settings.theme);
+        setLanguage(settings.language);
+        updateGreeting();
+        updateSummary();
+        renderBudgets();
+        renderTransactions();
+        generateInsights();
+        renderCharts();
+        // Prompt the user to sign in again or continue as guest
+        openLoginModal();
       }
 
       /* ----- Chart Rendering & Estimation ----- */
