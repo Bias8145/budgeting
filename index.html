@@ -1839,44 +1839,40 @@ body.light .nav-overlay {
 
       /* ----- Persistence ----- */
       // Load state from Firestore for logged‑in users, otherwise from localStorage.  Returns a promise.
-async function loadState() {
-  try {
-    let userKey = '';
-    if (currentUser && !isGuestMode && currentUser.email) {
-      userKey = '_' + currentUser.email;
-    }
-    
-    // Load from localStorage first
-    const localTx = localStorage.getItem('ebt_transactions' + userKey);
-    transactions = localTx ? JSON.parse(localTx) : [];
-    
-    const localSettings = localStorage.getItem('ebt_settings' + userKey);
-    if (localSettings) {
-      settings = { ...settings, ...JSON.parse(localSettings) };
-    }
-
-    // Then try to load from Firestore if logged in
-    if (currentUser && !isGuestMode) {
-      const docRef = doc(db, 'users', currentUser.uid);
-      const snap = await getDoc(docRef);
-      
-      if (snap.exists()) {
-        const data = snap.data();
-        transactions = data.transactions || transactions;
-        settings = { ...settings, ...(data.settings || {}) };
-        
-        // Sync back to localStorage
-        localStorage.setItem('ebt_transactions' + userKey, JSON.stringify(transactions));
-        localStorage.setItem('ebt_settings' + userKey, JSON.stringify(settings));
+      async function loadState() {
+        // Always begin by loading from localStorage.  Determine a key suffix
+        // based on the current user's email if present.  Guests use the base keys.
+        let userKey = '';
+        if (currentUser && !isGuestMode && currentUser.email) {
+          userKey = '_' + currentUser.email;
+        }
+        const localTx = localStorage.getItem('ebt_transactions' + userKey);
+        transactions = localTx ? JSON.parse(localTx) : [];
+        const localSettings = localStorage.getItem('ebt_settings' + userKey);
+        if (localSettings) {
+          const parsed = JSON.parse(localSettings);
+          settings = { ...settings, ...parsed };
+        }
+        // If logged in (non guest), attempt to load data from Firestore.
+        if (currentUser && !isGuestMode) {
+          try {
+            const docRef = doc(db, 'users', currentUser.uid);
+            const snap = await getDoc(docRef);
+            if (snap.exists()) {
+              const data = snap.data();
+              if (Array.isArray(data.transactions)) {
+                transactions = data.transactions;
+              }
+              if (data.settings) {
+                settings = { ...settings, ...data.settings };
+              }
+            }
+          } catch (err) {
+            console.error('Error loading from Firestore', err);
+            // If Firestore fails, the previously loaded local state remains.
+          }
+        }
       }
-    }
-  } catch (err) {
-    console.error('Error loading state:', err);
-    // Fallback to empty state if error occurs
-    transactions = [];
-    settings = { ...settings, budgets: { ...DEFAULT_BUDGETS } };
-  }
-}
       // Save transactions to Firestore for logged‑in users, otherwise to localStorage
       async function saveTransactions() {
         // Always persist transactions to localStorage using a key that includes the
@@ -2798,47 +2794,38 @@ async function loadState() {
       init();
 
       // Listen for Firebase authentication changes and update state accordingly
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    // User is signed in
-    currentUser = user;
-    isGuestMode = false;
-    settings.name = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
-    settings.googlePhotoURL = user.photoURL || null;
-    localStorage.setItem('enhanced_user', JSON.stringify({ 
-      uid: user.uid, 
-      email: user.email,
-      displayName: user.displayName,
-      photoURL: user.photoURL
-    }));
-    await loadState();
-    // Pastikan data sudah dimuat sebelum render
-    updateUI();
-  } else {
-    // User is signed out
-    handleGuestMode();
-  }
-});
-
-async function updateUI() {
-  setTheme(settings.theme);
-  setLanguage(settings.language);
-  updateGreeting();
-  updateSummary();
-  renderBudgets();
-  renderTransactions();
-  generateInsights();
-  renderCharts();
-}
-
-function handleGuestMode() {
-  currentUser = null;
-  isGuestMode = true;
-  settings.name = 'Guest';
-  settings.googlePhotoURL = null;
-  localStorage.setItem('enhanced_guest', 'true');
-  loadState().then(updateUI);
-}
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          currentUser = user;
+          isGuestMode = false;
+          settings.name = user.displayName || (user.email ? user.email.split('@')[0] : 'User');
+          // Save Google photo URL if available
+          settings.googlePhotoURL = user.photoURL || null;
+          // Persist user info locally
+          localStorage.setItem('enhanced_user', JSON.stringify({ uid: user.uid, email: user.email }));
+          localStorage.removeItem('enhanced_guest');
+          await loadState();
+          // Restore Google photo after loading state
+          settings.googlePhotoURL = user.photoURL || settings.googlePhotoURL || null;
+          // Persist updated settings
+          await saveSettings();
+        } else {
+          currentUser = null;
+          isGuestMode = true;
+          // Clear Google photo when signed out
+          settings.googlePhotoURL = null;
+          await loadState();
+        }
+        // Regardless of auth state, refresh UI
+        setTheme(settings.theme);
+        setLanguage(settings.language);
+        updateGreeting();
+        updateSummary();
+        renderBudgets();
+        renderTransactions();
+        generateInsights();
+        renderCharts();
+      });
 
       /* ----- Custom Confirm Modal ----- */
       function openConfirmModal() {
