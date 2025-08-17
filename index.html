@@ -2836,51 +2836,80 @@ body.light .nav-overlay {
       }
       init();
 
-      // Listen for Firebase authentication changes and update state accordingly
-        onAuthStateChanged(auth, async (user) => {
-          console.log('Auth state changed:', user ? user.email : 'logged out');
-  
-          if (user) {
-            currentUser = user;
-            isGuestMode = false;
+        const authListener = onAuthStateChanged(auth, async (user) => {
+  try {
+    if (user) {
+      // Handle successful login
+      currentUser = user;
+      isGuestMode = false;
+      
+      // Update user info
+      if (user.displayName) {
+        settings.name = user.displayName;
+      } else if (user.email) {
+        settings.name = user.email.split('@')[0];
+      }
+      
+      settings.googlePhotoURL = user.photoURL || null;
+      
+      // Persist user session
+      localStorage.setItem('enhanced_user', JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL
+      }));
+      localStorage.removeItem('enhanced_guest');
+      
+      closeLoginModal();
+    } else {
+      // Handle logout
+      if (currentUser !== null) {
+        // Only reset if previously logged in
+        currentUser = null;
+        localStorage.removeItem('enhanced_user');
+      }
+    }
     
-            if (user.displayName) {
-              settings.name = user.displayName;
-            } else if (user.email) {
-              settings.name = user.email.split('@')[0];
-            } else {
-              settings.name = 'User';
-            }
-
-            if (user.photoURL) {
-              settings.googlePhotoURL = user.photoURL;
-            }
-
-            localStorage.setItem('enhanced_user', JSON.stringify({
-              uid: user.uid,
-              email: user.email,
-              displayName: user.displayName,
-              photoURL: user.photoURL
-            }));
-            localStorage.removeItem('enhanced_guest');
+    // Always refresh UI
+    await loadState();
+    refreshUI();
     
-          } else {
-            if (currentUser !== null) {
-              const storedUser = localStorage.getItem('enhanced_user');
-              if (storedUser) {
-                try {
-                  const userObj = JSON.parse(storedUser);
-                  return;
-                } catch (e) {
-                  console.warn('Failed to restore user session');
-                }
-              }
-            }
-          }
+  } catch (error) {
+    console.error('Auth state error:', error);
+    // Fallback to guest mode
+    currentUser = null;
+    isGuestMode = true;
+    localStorage.removeItem('enhanced_user');
+    localStorage.setItem('enhanced_guest', 'true');
+    refreshUI();
+  }
+});
+        
+        function refreshUI() {
+  // Update all UI components
+  setTheme(settings.theme);
+  setLanguage(settings.language);
+  updateGreeting();
+  updateSummary();
+  renderBudgets();
+  renderTransactions();
+  generateInsights();
+  renderCharts();
   
-          await loadState();
-          refreshUI();
-        });
+  // Show login modal if no active session
+  const hasUser = localStorage.getItem('enhanced_user');
+  const hasGuest = localStorage.getItem('enhanced_guest');
+  
+  if (!hasUser && !hasGuest) {
+    openLoginModal();
+  } else {
+    closeLoginModal();
+  }
+  
+  // Reposition UI elements
+  repositionQuickActions();
+}
 
       /* ----- Custom Confirm Modal ----- */
       function openConfirmModal() {
@@ -3056,30 +3085,44 @@ body.light .nav-overlay {
       // return the application to guest mode.  The UI is refreshed and the
       // login modal is opened so the user can choose how to proceed.
         async function handleLogout() {
-          try {
-            await saveTransactions();
-            await saveSettings();
+  try {
+    // Save data before logout
+    await saveTransactions();
+    await saveSettings();
     
-            if (auth && auth.currentUser) {
-              await signOut(auth);
-            }
+    // Sign out from Firebase
+    if (auth && auth.currentUser) {
+      await signOut(auth);
+    }
 
-            localStorage.removeItem('enhanced_user');
-            localStorage.removeItem('enhanced_guest');
+    // Clear local storage
+    localStorage.removeItem('enhanced_user');
+    localStorage.removeItem('enhanced_guest');
 
-            currentUser = null;
-            isGuestMode = true;
-            settings.name = 'Guest';
-            settings.avatar = 'user';
-            settings.googlePhotoURL = null;
+    // Reset state
+    currentUser = null;
+    isGuestMode = true;
+    settings = {
+      name: 'Guest',
+      theme: settings.theme, // Maintain theme preference
+      language: settings.language, // Maintain language preference
+      avatar: 'user',
+      budgets: { ...settings.budgets }, // Maintain budgets
+      googlePhotoURL: null
+    };
 
-            await loadState();
-            refreshUI();
-            openLoginModal();
-          } catch (err) {
-            console.error('Logout error:', err);
-          }
-        }
+    // Refresh UI and show login modal
+    await loadState();
+    refreshUI();
+    openLoginModal();
+    
+  } catch (err) {
+    console.error('Logout error:', err);
+    openAlert(settings.language === 'en' 
+      ? 'Failed to logout. Please refresh the page.' 
+      : 'Gagal logout. Silakan muat ulang halaman.');
+  }
+}
 
       /* ----- Chart Rendering & Estimation ----- */
       function renderCharts() {
