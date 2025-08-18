@@ -357,6 +357,121 @@
       /* stronger elevation on hover */
       box-shadow: 0 8px 16px rgba(0,0,0,0.25), 0 16px 32px rgba(0,0,0,0.2);
     }
+
+    /* ====================== SAVINGS GOALS ========================= */
+    /*
+      The savings section mirrors the budget goals styling but adds
+      contextual actions for deposits and withdrawals.  Each card
+      presents a summary of the goal name, the amount saved so far
+      versus the target, a progress bar and a row of buttons for
+      depositing, withdrawing, editing and deleting the goal.  Colours
+      derive from the existing palette to maintain visual harmony with
+      the rest of the application.  Hover interactions lift the card
+      subtly to communicate interactivity.  These styles are scoped
+      exclusively to the savings components to avoid interfering with
+      the existing budget layout.
+    */
+    .savings-goals {
+      margin-bottom: 24px;
+    }
+    .savings-card {
+      background: var(--card-bg-dark);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      /* 3D depth consistent with budget cards */
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3), 0 12px 24px rgba(0,0,0,0.25);
+    }
+    body.light .savings-card {
+      background: var(--card-bg-light);
+      border-color: rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08), 0 8px 16px rgba(0,0,0,0.05);
+    }
+    .savings-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.25), 0 16px 32px rgba(0,0,0,0.2);
+    }
+    .savings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .saving-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .saving-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: white;
+      background: var(--info-color);
+    }
+    .saving-info h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      color: var(--text-primary-dark);
+    }
+    body.light .saving-info h3 {
+      color: var(--text-primary-light);
+    }
+    .saving-info p {
+      font-size: 12px;
+      color: var(--text-secondary-dark);
+    }
+    body.light .saving-info p {
+      color: var(--text-secondary-light);
+    }
+    .saving-amount {
+      text-align: right;
+    }
+    .saved-amount {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+    .target-amount {
+      font-size: 12px;
+      color: var(--text-secondary-dark);
+    }
+    body.light .target-amount {
+      color: var(--text-secondary-light);
+    }
+    .savings-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .saving-action-btn {
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 0.2s;
+      /* Enlarge the clickable area around each icon so that users can
+         easily tap or click on the actions.  Without padding the
+         buttons collapse to the size of the icon glyph, making
+         interaction unreliable on some browsers. */
+      padding: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .saving-action-btn:hover {
+      transform: scale(1.1);
+    }
     .budget-header {
       display: flex;
       justify-content: space-between;
@@ -430,6 +545,49 @@
       text-align: right;
     }
     body.light .progress-percentage { color: var(--text-secondary-light); }
+
+    /* Button to show/hide additional budget cards */
+    .expand-btn {
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 8px 0;
+      display: block;
+      width: 100%;
+      text-align: center;
+      transition: color 0.3s ease;
+    }
+    .expand-btn:hover {
+      color: var(--warning-color);
+    }
+
+    /* Actions panel for budget cards */
+    .budget-actions-panel {
+      margin-top: 12px;
+      display: flex;
+      gap: 16px;
+      justify-content: flex-start;
+    }
+    .budget-action-btn {
+      background: none;
+      border: none;
+      color: var(--primary-color);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+    .budget-action-btn:hover {
+      transform: scale(1.1);
+      color: var(--warning-color);
+    }
 
     /* Quick actions */
     .quick-actions {
@@ -1405,6 +1563,27 @@ body.light .nav-overlay {
         <button class="view-all-btn" id="viewAllBudgets" onclick="openSettingsModal(); return false;">Edit Budgets</button>
       </div>
       <div id="budgetCards"></div>
+      <!-- Toggle button to expand or collapse the list of budget cards.  When collapsed only a subset
+           of categories is visible; clicking toggles the rest.  The label is updated dynamically
+           based on the current language and state via updateBudgetVisibility(). -->
+      <button id="toggleBudgetView" class="expand-btn" onclick="toggleBudgetView(); return false;">Show More</button>
+    </div>
+
+    <!-- Savings Goals Section -->
+    <!--
+      A dedicated area for tracking long‑term saving goals.  Users can
+      create multiple savings with flexible target amounts, deposit
+      schedules and mandatory contributions.  Progress is visualised
+      through a familiar progress bar similar to the one used for
+      budgets.  Action buttons allow quick deposits, withdrawals,
+      editing and deletion without navigating away from the dashboard.
+    -->
+    <div class="savings-goals" data-page="dashboard">
+      <div class="section-header">
+        <h2 class="section-title" id="savingsGoalsTitle">Savings Goals</h2>
+        <button class="view-all-btn" id="addSavingsBtn">Add Saving</button>
+      </div>
+      <div id="savingsCards"></div>
     </div>
     <!-- AI Insights Card relocated above.  Original position hidden to avoid duplicate IDs. -->
     <!-- <div class="ai-insights" style="display:none;"><div class="ai-header"><div class="ai-icon"><i class="fas fa-lightbulb"></i></div><div class="ai-title" id="aiTitle">AI Insights</div></div><div id="insightsList"></div></div> -->
@@ -1522,6 +1701,64 @@ body.light .nav-overlay {
       <div class="form-buttons">
         <button class="btn btn-cancel" id="confirmNo">Cancel</button>
         <button class="btn btn-save" id="confirmYes">Yes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Saving Modal -->
+  <!--
+    Modal used to create a new savings goal or edit an existing one.
+    Captures the goal name, target amount, mandatory deposit amount
+    and deposit frequency (daily, weekly or monthly).  Labels and
+    buttons will be localised through the updateText() function.
+  -->
+  <div class="modal" id="savingModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="savingModalTitle">Add Saving</h3>
+      <div class="form-group">
+        <label class="form-label" id="labelSavingName">Name</label>
+        <input type="text" class="form-input" id="savingName" placeholder="e.g. Emergency Fund" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="labelSavingTarget">Target Amount (Rp)</label>
+        <input type="number" class="form-input" id="savingTarget" min="1" placeholder="0" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="labelSavingDeposit">Deposit Amount (Rp)</label>
+        <input type="number" class="form-input" id="savingDeposit" min="1" placeholder="0" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="labelSavingFreq">Frequency</label>
+        <select class="form-select" id="savingFrequency">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+      <div class="form-buttons">
+        <button class="btn btn-cancel" id="savingCancel">Cancel</button>
+        <button class="btn btn-save" id="savingSave">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Saving Deposit/Withdraw Modal -->
+  <!--
+    Modal used for performing a deposit or withdrawal on a specific
+    savings goal.  The title and actions will adapt based on
+    whether the user is depositing or withdrawing.  Amount input
+    defaults to the goal's mandatory deposit amount for convenience.
+  -->
+  <div class="modal" id="savingTransModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="savingTransModalTitle">Deposit</h3>
+      <div class="form-group">
+        <label class="form-label" id="labelSavingTransAmount">Amount (Rp)</label>
+        <input type="number" class="form-input" id="savingTransAmount" min="1" placeholder="0" />
+      </div>
+      <div class="form-buttons">
+        <button class="btn btn-cancel" id="savingTransCancel">Cancel</button>
+        <button class="btn btn-save" id="savingTransSave">Save</button>
       </div>
     </div>
   </div>
@@ -1703,7 +1940,9 @@ body.light .nav-overlay {
         entertainment: 600000,
         salary: Infinity,
         freelance: Infinity,
-        other: 500000
+        other: 500000,
+        // No budget limit for savings; contributions are treated separately from spending
+        savings: Infinity
       };
 
       // Category metadata for icons and colours (for cards and progress bars)
@@ -1718,7 +1957,12 @@ body.light .nav-overlay {
         entertainment: { name: { en: 'Entertainment', id: 'Hiburan' }, icon: 'fa-gamepad', color: '#7c3aed' },
         salary: { name: { en: 'Salary', id: 'Gaji' }, icon: 'fa-money-bill', color: '#22c55e' },
         freelance: { name: { en: 'Freelance', id: 'Freelance' }, icon: 'fa-briefcase', color: '#eab308' },
-        other: { name: { en: 'Other', id: 'Lainnya' }, icon: 'fa-ellipsis', color: '#22c55e' }
+        other: { name: { en: 'Other', id: 'Lainnya' }, icon: 'fa-ellipsis', color: '#22c55e' },
+        // Savings category is used for transactions representing transfers
+        // into or out of a savings goal.  It is hidden from budget
+        // calculations but appears in transaction lists and charts.  A
+        // cheerful blue emphasises the aspirational nature of savings.
+        savings: { name: { en: 'Savings', id: 'Tabungan' }, icon: 'fa-piggy-bank', color: '#3b82f6' }
       };
 
       // Mapping between avatar identifiers and Font Awesome icons.  Users
@@ -1771,6 +2015,22 @@ body.light .nav-overlay {
         , todayExpense: 'Today Expense'
         , sixMonthSummary: '6‑Month Income vs Expense'
         , resetData: 'Reset Data'
+        , savingsGoals: 'Savings Goals'
+        , addSaving: 'Add Saving'
+        , editSaving: 'Edit Saving'
+        , savingName: 'Name'
+        , savingTarget: 'Target Amount (Rp)'
+        , savingDeposit: 'Deposit Amount (Rp)'
+        , savingFrequency: 'Frequency'
+        , daily: 'Daily'
+        , weekly: 'Weekly'
+        , monthly: 'Monthly'
+        , saved: 'Saved'
+        , target: 'Target'
+        , deposit: 'Deposit'
+        , withdraw: 'Withdraw'
+        , noSavings: 'No savings'
+        , deleteSaving: 'Delete Saving'
         },
         id: {
           availableBalance: 'Saldo Tersedia',
@@ -1810,6 +2070,22 @@ body.light .nav-overlay {
         , todayExpense: 'Pengeluaran Hari Ini'
         , sixMonthSummary: 'Pendapatan vs Pengeluaran 6 Bulan'
         , resetData: 'Setel Ulang Data'
+        , savingsGoals: 'Tabungan'
+        , addSaving: 'Tambah Tabungan'
+        , editSaving: 'Ubah Tabungan'
+        , savingName: 'Nama'
+        , savingTarget: 'Target (Rp)'
+        , savingDeposit: 'Jumlah Setoran (Rp)'
+        , savingFrequency: 'Frekuensi'
+        , daily: 'Harian'
+        , weekly: 'Mingguan'
+        , monthly: 'Bulanan'
+        , saved: 'Terkumpul'
+        , target: 'Target'
+        , deposit: 'Setor'
+        , withdraw: 'Tarik'
+        , noSavings: 'Belum ada tabungan'
+        , deleteSaving: 'Hapus Tabungan'
         }
       };
 
@@ -1820,9 +2096,22 @@ body.light .nav-overlay {
         theme: 'dark',
         language: 'en',
         avatar: 'user',
-        budgets: { ...DEFAULT_BUDGETS }
+        budgets: { ...DEFAULT_BUDGETS },
+        // Array of savings goals.  Each entry has id, name, target,
+        // saved, deposit (mandatory contribution amount) and frequency
+        // ('daily', 'weekly', 'monthly').  Defaults to an empty list.
+        savings: []
       };
       let editingId = null;
+
+      // Index of the savings goal currently being edited.  If null,
+      // the add saving modal will create a new goal.
+      let editingSavingIndex = null;
+      // Index of the savings goal currently targeted by a deposit or
+      // withdrawal modal.  Used to update the correct goal on save.
+      let currentSavingTransIndex = null;
+      // Whether the current savings transaction is a deposit or withdraw.
+      let currentSavingTransType = null;
 
       // Term used to filter transactions via the search bar
       let searchTerm = '';
@@ -1875,6 +2164,14 @@ body.light .nav-overlay {
                 console.warn('Firestore load failed, using localStorage:', err);
               }
             }
+
+          // Ensure a savings array exists after merging settings from
+          // localStorage or Firestore.  Older versions of the app may not
+          // define this field, so we initialise it here to prevent
+          // undefined errors throughout the UI.
+          if (!Array.isArray(settings.savings)) {
+            settings.savings = [];
+          }
           } catch (err) {
             console.error('Error loading state:', err);
             transactions = [];
@@ -1883,7 +2180,8 @@ body.light .nav-overlay {
               theme: 'dark',
               language: 'en',
               avatar: 'user',
-              budgets: { ...DEFAULT_BUDGETS }
+            budgets: { ...DEFAULT_BUDGETS },
+            savings: []
             };
           }
         }
@@ -1937,6 +2235,10 @@ body.light .nav-overlay {
         document.body.classList.toggle('light', theme === 'light');
         settings.theme = theme;
         saveSettings();
+      // Re-render savings section to update theme-dependent colours
+      // and messages.  The 'No savings' text uses theme colours
+      // computed at render time, so we refresh the component here.
+      renderSavings();
       }
       function setLanguage(lang) {
         settings.language = lang;
@@ -1945,6 +2247,11 @@ body.light .nav-overlay {
         renderBudgets();
         renderTransactions();
         generateInsights();
+        // Re-render savings goals to update localisation.  Without
+        // explicitly calling this function here, tooltips and labels
+        // within the savings cards may remain in the previous
+        // language when the user switches languages.
+        renderSavings();
       }
       function updateText() {
         const t = TRANSLATIONS[settings.language];
@@ -2007,6 +2314,32 @@ body.light .nav-overlay {
         // Update Reset Data button text if it exists
         const resetBtn = document.getElementById('resetDataBtn');
         if (resetBtn) resetBtn.textContent = t.resetData;
+
+        // Update labels for the savings section and modals
+        const savingsTitleEl = document.getElementById('savingsGoalsTitle');
+        if (savingsTitleEl) savingsTitleEl.textContent = t.savingsGoals;
+        const addSavingsBtn = document.getElementById('addSavingsBtn');
+        if (addSavingsBtn) addSavingsBtn.textContent = t.addSaving;
+        const savingModalTitle = document.getElementById('savingModalTitle');
+        if (savingModalTitle) savingModalTitle.textContent = (editingSavingIndex !== null ? t.editSaving : t.addSaving);
+        const lblSavingName = document.getElementById('labelSavingName');
+        if (lblSavingName) lblSavingName.textContent = t.savingName;
+        const lblSavingTarget = document.getElementById('labelSavingTarget');
+        if (lblSavingTarget) lblSavingTarget.textContent = t.savingTarget;
+        const lblSavingDeposit = document.getElementById('labelSavingDeposit');
+        if (lblSavingDeposit) lblSavingDeposit.textContent = t.savingDeposit;
+        const lblSavingFreq = document.getElementById('labelSavingFreq');
+        if (lblSavingFreq) lblSavingFreq.textContent = t.savingFrequency;
+        const savingCancelBtn = document.getElementById('savingCancel');
+        if (savingCancelBtn) savingCancelBtn.textContent = t.cancel;
+        const savingSaveBtn = document.getElementById('savingSave');
+        if (savingSaveBtn) savingSaveBtn.textContent = t.save;
+        const lblSavingTransAmount = document.getElementById('labelSavingTransAmount');
+        if (lblSavingTransAmount) lblSavingTransAmount.textContent = t.amount;
+        const savingTransCancelBtn = document.getElementById('savingTransCancel');
+        if (savingTransCancelBtn) savingTransCancelBtn.textContent = t.cancel;
+        const savingTransSaveBtn = document.getElementById('savingTransSave');
+        if (savingTransSaveBtn) savingTransSaveBtn.textContent = t.save;
 
         // Update logout button tooltip.  The logout button is icon-only,
         // so we use its title attribute for localisation.  If the button
@@ -2170,7 +2503,10 @@ body.light .nav-overlay {
             totalsByCategory[t.category] = (totalsByCategory[t.category] || 0) + t.amount;
           }
         });
-        Object.keys(CATEGORY_META).forEach(cat => {
+        // Skip the 'savings' category when rendering budget cards.  Savings
+        // contributions are managed separately and should not count
+        // towards spending limits in the budget overview.
+        Object.keys(CATEGORY_META).filter(cat => cat !== 'savings').forEach(cat => {
           const meta = CATEGORY_META[cat];
           // Determine the budget for this category.  Treat any non‑finite or
           // non‑positive values (including null or empty) as having no limit.
@@ -2213,8 +2549,40 @@ body.light .nav-overlay {
               <div class="progress-percentage">${percentage.toFixed(0)}%</div>
             </div>
           `;
+          // Attach an actions panel to the budget card and enable
+          // interactive editing and resetting of the category.  The panel
+          // remains hidden until the user taps the card (excluding the
+          // buttons themselves).  Labels adapt to the current language.
+          const actionsPanel = document.createElement('div');
+          actionsPanel.className = 'budget-actions-panel';
+          actionsPanel.style.display = 'none';
+          const editLabel = settings.language === 'en' ? 'Edit Budget' : 'Ubah Anggaran';
+          const resetLabel = settings.language === 'en' ? 'Reset Spending' : 'Atur Ulang Pengeluaran';
+          actionsPanel.innerHTML = `
+            <button class="budget-action-btn edit-btn" title="${editLabel}"><i class="fas fa-edit"></i></button>
+            <button class="budget-action-btn reset-btn" title="${resetLabel}"><i class="fas fa-rotate-left"></i></button>
+          `;
+          card.appendChild(actionsPanel);
+          card.addEventListener('click', (ev) => {
+            if (!ev.target.closest('.budget-action-btn')) {
+              actionsPanel.style.display = actionsPanel.style.display === 'none' ? 'flex' : 'none';
+            }
+          });
+          actionsPanel.querySelector('.edit-btn').onclick = (ev) => {
+            ev.stopPropagation();
+            openSettingsModal();
+          };
+          actionsPanel.querySelector('.reset-btn').onclick = (ev) => {
+            ev.stopPropagation();
+            resetCategorySpent(cat);
+          };
           container.appendChild(card);
         });
+        // After constructing budget cards, reposition the savings section above
+        // budgets and apply the collapsed/expanded view.  These helpers are
+        // defined globally in this script and will not throw if undefined.
+        if (typeof repositionSavings === 'function') repositionSavings();
+        if (typeof updateBudgetVisibility === 'function') updateBudgetVisibility();
       }
 
       function renderTransactions() {
@@ -2386,6 +2754,241 @@ body.light .nav-overlay {
         setTimeout(() => { popup.classList.remove('show'); }, 5000);
       }
 
+      /* ----- Savings Goal Functions ----- */
+      // Render all savings goals into the dashboard.  Displays an empty
+      // message when none exist.
+      function renderSavings() {
+        const container = document.getElementById('savingsCards');
+        if (!container) return;
+        container.innerHTML = '';
+        if (!settings.savings || settings.savings.length === 0) {
+          const msg = document.createElement('div');
+          msg.className = 'empty-message';
+          msg.style.textAlign = 'center';
+          msg.style.color = settings.theme === 'light' ? '#6b7280' : '#9ca3af';
+          msg.textContent = TRANSLATIONS[settings.language].noSavings;
+          container.appendChild(msg);
+          return;
+        }
+        settings.savings.forEach((s, idx) => {
+          const progress = s.target > 0 ? Math.min((s.saved || 0) / s.target, 1) : 0;
+          const percent = (progress * 100).toFixed(0);
+          const progColor = getComputedStyle(document.documentElement).getPropertyValue('--info-color').trim();
+          const t = TRANSLATIONS[settings.language];
+          const card = document.createElement('div');
+          card.className = 'savings-card';
+          card.innerHTML = `
+            <div class="savings-header">
+              <div class="saving-title-group">
+                <div class="saving-icon"><i class="fas fa-piggy-bank"></i></div>
+                <div class="saving-info">
+                  <h3>${s.name}</h3>
+                  <p>${t.saved}: ${formatCurrency(s.saved || 0)}</p>
+                </div>
+              </div>
+              <div class="saving-amount">
+                <div class="saved-amount">${formatCurrency(s.saved || 0)}</div>
+                <div class="target-amount">${formatCurrency(s.target)}</div>
+              </div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar"><div class="progress-fill" style="background:${progColor}; width:${percent}%"></div></div>
+              <div class="progress-percentage">${percent}%</div>
+            </div>
+            <div class="savings-actions">
+              <button class="saving-action-btn" data-index="${idx}" data-action="deposit" title="${t.deposit}"><i class="fas fa-arrow-down"></i></button>
+              <button class="saving-action-btn" data-index="${idx}" data-action="withdraw" title="${t.withdraw}"><i class="fas fa-arrow-up"></i></button>
+              <button class="saving-action-btn" data-index="${idx}" data-action="edit" title="${t.editSaving}"><i class="fas fa-pen"></i></button>
+              <button class="saving-action-btn" data-index="${idx}" data-action="delete" title="${t.deleteSaving}"><i class="fas fa-trash"></i></button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+        /*
+         * Attach click handlers to savings action buttons via
+         * event delegation.  Binding individual event listeners on
+         * each button can fail if elements are dynamically replaced
+         * (for example when switching languages or themes), leaving
+         * stale handlers behind.  Instead we listen once on the
+         * container and react only when the click originated from
+         * a `.saving-action-btn`.  Using `closest()` ensures clicks
+         * on nested `<i>` icons are also detected.  This approach
+         * improves robustness across re‑renders and avoids missing
+         * interactions due to overlaying scrollbars or other UI
+         * elements.
+         */
+        // Remove any existing delegated handler before adding a new one to
+        // avoid stacking multiple identical listeners.
+        if (container._savingsClickHandler) {
+          container.removeEventListener('click', container._savingsClickHandler);
+        }
+        container._savingsClickHandler = function(event) {
+          const btnElem = event.target.closest('.saving-action-btn');
+          if (!btnElem) return;
+          event.stopPropagation();
+          const idx = parseInt(btnElem.dataset.index, 10);
+          const action = btnElem.dataset.action;
+          if (isNaN(idx) || !action) return;
+          if (action === 'deposit' || action === 'withdraw') {
+            openSavingTransModal(idx, action);
+          } else if (action === 'edit') {
+            openSavingModal(idx);
+          } else if (action === 'delete') {
+            const msg = settings.language === 'en'
+              ? 'Delete this saving?'
+              : 'Hapus tabungan ini?';
+            showConfirm(msg, () => {
+              deleteSaving(idx);
+            });
+          }
+        };
+        container.addEventListener('click', container._savingsClickHandler);
+      }
+
+      // Open the add/edit saving modal.  When index is null a new goal
+      // will be created; otherwise the existing goal at the given index is
+      // edited.  Fields are pre-populated when editing.
+      function openSavingModal(index = null) {
+        editingSavingIndex = index;
+        const modal = document.getElementById('savingModal');
+        const t = TRANSLATIONS[settings.language];
+        document.getElementById('savingModalTitle').textContent = index !== null ? t.editSaving : t.addSaving;
+        if (index !== null) {
+          const s = settings.savings[index];
+          document.getElementById('savingName').value = s.name || '';
+          document.getElementById('savingTarget').value = s.target || '';
+          document.getElementById('savingDeposit').value = s.deposit || '';
+          document.getElementById('savingFrequency').value = s.frequency || 'monthly';
+        } else {
+          document.getElementById('savingName').value = '';
+          document.getElementById('savingTarget').value = '';
+          document.getElementById('savingDeposit').value = '';
+          document.getElementById('savingFrequency').value = 'monthly';
+        }
+        modal.classList.add('active');
+      }
+
+      function closeSavingModal() {
+        editingSavingIndex = null;
+        document.getElementById('savingModal').classList.remove('active');
+      }
+
+      // Persist a new or edited savings goal and refresh the list.  Basic
+      // validation ensures a name and positive target are provided.
+      function handleSavingSave() {
+        const name = document.getElementById('savingName').value.trim();
+        const targetVal = document.getElementById('savingTarget').value;
+        const depositVal = document.getElementById('savingDeposit').value;
+        const freq = document.getElementById('savingFrequency').value;
+        const target = parseInt(targetVal || '0');
+        const deposit = parseInt(depositVal || '0');
+        if (!name || !target || target <= 0) {
+          openAlert(settings.language === 'en' ? 'Please fill in all required fields.' : 'Mohon lengkapi semua bidang wajib.');
+          return;
+        }
+        if (editingSavingIndex === null) {
+          const id = Date.now().toString() + Math.random().toString(16).slice(2);
+          settings.savings.push({ id, name, target, saved: 0, deposit: deposit || 0, frequency: freq });
+        } else {
+          const s = settings.savings[editingSavingIndex];
+          s.name = name;
+          s.target = target;
+          s.deposit = deposit || 0;
+          s.frequency = freq;
+        }
+        saveSettings();
+        renderSavings();
+        closeSavingModal();
+        updateText();
+      }
+
+      // Open the deposit/withdraw modal for a given savings goal.  The
+      // title and default amount depend on whether the action is a
+      // deposit or withdrawal.
+      function openSavingTransModal(index, action) {
+        currentSavingTransIndex = index;
+        currentSavingTransType = action;
+        const modal = document.getElementById('savingTransModal');
+        const t = TRANSLATIONS[settings.language];
+        document.getElementById('savingTransModalTitle').textContent = action === 'withdraw' ? t.withdraw : t.deposit;
+        const s = settings.savings[index];
+        document.getElementById('savingTransAmount').value = action === 'deposit' ? (s.deposit || '') : '';
+        modal.classList.add('active');
+      }
+
+      function closeSavingTransModal() {
+        currentSavingTransIndex = null;
+        currentSavingTransType = null;
+        document.getElementById('savingTransModal').classList.remove('active');
+      }
+
+      // Execute a deposit or withdrawal against the current savings goal.
+      function handleSavingTransSave() {
+        const amountVal = document.getElementById('savingTransAmount').value;
+        const amount = parseInt(amountVal || '0');
+        if (currentSavingTransIndex === null || !currentSavingTransType) {
+          closeSavingTransModal();
+          return;
+        }
+        if (!amount || amount <= 0) {
+          openAlert(settings.language === 'en' ? 'Enter a valid amount.' : 'Masukkan jumlah yang valid.');
+          return;
+        }
+        const s = settings.savings[currentSavingTransIndex];
+        const now = new Date().toISOString();
+        let tx = null;
+        if (currentSavingTransType === 'deposit') {
+          s.saved = (s.saved || 0) + amount;
+          tx = {
+            id: Date.now().toString() + Math.random().toString(16).slice(2),
+            type: 'expense',
+            category: 'savings',
+            amount: amount,
+            description: (settings.language === 'en' ? 'Deposit to ' : 'Setor ke ') + s.name,
+            date: now,
+            savingId: s.id
+          };
+        } else if (currentSavingTransType === 'withdraw') {
+          s.saved = Math.max((s.saved || 0) - amount, 0);
+          tx = {
+            id: Date.now().toString() + Math.random().toString(16).slice(2),
+            type: 'income',
+            category: 'savings',
+            amount: amount,
+            description: (settings.language === 'en' ? 'Withdraw from ' : 'Tarik dari ') + s.name,
+            date: now,
+            savingId: s.id
+          };
+        }
+        if (tx) {
+          transactions.push(tx);
+          saveTransactions();
+        }
+        saveSettings();
+        renderSavings();
+        renderTransactions();
+        generateInsights();
+        updateSummary();
+        renderCharts();
+        closeSavingTransModal();
+      }
+
+      // Delete a savings goal after confirmation.  Also removes
+      // associated transactions to maintain data consistency.
+      function deleteSaving(index) {
+        const s = settings.savings[index];
+        transactions = transactions.filter(tx => tx.savingId !== s.id);
+        settings.savings.splice(index, 1);
+        saveTransactions();
+        saveSettings();
+        renderSavings();
+        renderTransactions();
+        generateInsights();
+        updateSummary();
+        renderCharts();
+      }
+
       /* ----- Modal controls ----- */
       function openTransactionModal(editId = null) {
         editingId = editId;
@@ -2513,6 +3116,96 @@ body.light .nav-overlay {
       }
       // Expose repositionQuickActions globally so it can be called from other scopes
       window.repositionQuickActions = repositionQuickActions;
+
+      /* =======================================================================
+       *  Additional helpers for Savings ordering and Budget expansion
+       *  -----------------------------------------------------------------------
+       *  These variables and functions handle reordering of the Savings section
+       *  above the Budget section and implementing a collapsed view for
+       *  budgets.  Users can toggle between showing only a handful of
+       *  categories or the full list via the Show More/Show Less button.  Each
+       *  budget card also includes a hidden actions panel with options to edit
+       *  the budget (opens the Settings modal) or reset spending for the
+       *  current month.  The reset operation prompts for confirmation before
+       *  removing expense transactions for that category.
+       */
+      // When false, only a limited number of budget cards (defined by
+      // budgetsDefaultCount) are displayed; when true, all cards are shown.
+      let budgetsExpanded = false;
+      const budgetsDefaultCount = 3;
+
+      // Move the savings section above the budget section on the dashboard.  This
+      // ensures long‑term goals are emphasised before monthly budgets.  The
+      // reorder only occurs if the two sections are siblings of the same parent.
+      function repositionSavings() {
+        const budgetSection = document.querySelector('.budget-goals[data-page="dashboard"]');
+        const savingsSection = document.querySelector('.savings-goals[data-page="dashboard"]');
+        if (budgetSection && savingsSection && budgetSection.parentNode) {
+          if (savingsSection.nextElementSibling !== budgetSection) {
+            budgetSection.parentNode.insertBefore(savingsSection, budgetSection);
+          }
+        }
+      }
+
+      // Update the visibility of budget cards based on the collapsed/expanded
+      // state.  Also updates the label of the toggle button according to the
+      // current language.  When collapsed, only the first budgetsDefaultCount
+      // categories are shown.
+      function updateBudgetVisibility() {
+        const container = document.getElementById('budgetCards');
+        if (!container) return;
+        const cards = container.querySelectorAll('.budget-card');
+        cards.forEach((card, idx) => {
+          if (!budgetsExpanded && idx >= budgetsDefaultCount) {
+            card.style.display = 'none';
+          } else {
+            card.style.display = '';
+          }
+        });
+        // Update the toggle button label if it exists
+        const toggleBtn = document.getElementById('toggleBudgetView');
+        if (toggleBtn) {
+          const showMoreLabel = settings.language === 'en' ? 'Show More' : 'Tampilkan Semua';
+          const showLessLabel = settings.language === 'en' ? 'Show Less' : 'Sembunyikan';
+          toggleBtn.textContent = budgetsExpanded ? showLessLabel : showMoreLabel;
+        }
+      }
+
+      // Toggle between collapsed and expanded views for budgets.  Called from
+      // the Show More/Show Less button in the budget goals section.
+      function toggleBudgetView() {
+        budgetsExpanded = !budgetsExpanded;
+        updateBudgetVisibility();
+      }
+      // Expose toggleBudgetView globally so it can be invoked from inline HTML
+      window.toggleBudgetView = toggleBudgetView;
+
+      // Reset spending for a given category in the current month.  Prompts
+      // confirmation before deleting transactions.  Afterwards it re-renders
+      // budgets, transactions and charts and repositions sections.
+      function resetCategorySpent(cat) {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const categoryName = CATEGORY_META[cat] && CATEGORY_META[cat].name ? CATEGORY_META[cat].name[settings.language] : cat;
+        const msg = settings.language === 'en'
+          ? `Reset spending for ${categoryName}? This will remove all expenses in this category for the current month.`
+          : `Atur ulang pengeluaran untuk ${categoryName}? Ini akan menghapus semua pengeluaran kategori ini bulan ini.`;
+        showConfirm(msg, () => {
+          transactions = transactions.filter(tx => {
+            const date = new Date(tx.date);
+            return !(tx.category === cat && tx.type === 'expense' && date.getMonth() === currentMonth && date.getFullYear() === currentYear);
+          });
+          saveTransactions();
+          renderBudgets();
+          renderTransactions();
+          generateInsights();
+          updateSummary();
+          renderCharts();
+          repositionSavings();
+          updateBudgetVisibility();
+        });
+      }
 
       /* ----- Event Handlers ----- */
       function handleTransactionSave() {
@@ -2690,6 +3383,32 @@ body.light .nav-overlay {
             navigateTo('dashboard');
           });
         }
+
+        // ===================== Savings Goal Events =====================
+        // When the user clicks the "Add Saving" button, open the add/edit
+        // saving modal with a null index to create a new goal.  Use
+        // optional chaining in case the element is not present (older
+        // versions of the app may not include the savings section).
+        const addSavingsBtn = document.getElementById('addSavingsBtn');
+        if (addSavingsBtn) {
+          addSavingsBtn.addEventListener('click', () => {
+            openSavingModal(null);
+          });
+        }
+        // We attach click handlers to each savings action button when
+        // rendering the savings list.  Event delegation within the
+        // container is intentionally omitted here to avoid conflicts
+        // with those handlers.  See renderSavings() for details.
+        // Buttons for saving creation/edit modal
+        const savingCancelBtn = document.getElementById('savingCancel');
+        if (savingCancelBtn) savingCancelBtn.addEventListener('click', closeSavingModal);
+        const savingSaveBtn = document.getElementById('savingSave');
+        if (savingSaveBtn) savingSaveBtn.addEventListener('click', handleSavingSave);
+        // Buttons for deposit/withdraw modal
+        const savingTransCancelBtn = document.getElementById('savingTransCancel');
+        if (savingTransCancelBtn) savingTransCancelBtn.addEventListener('click', closeSavingTransModal);
+        const savingTransSaveBtn = document.getElementById('savingTransSave');
+        if (savingTransSaveBtn) savingTransSaveBtn.addEventListener('click', handleSavingTransSave);
         // Clicking outside modal closes it
         document.querySelectorAll('.modal').forEach(modal => {
           modal.addEventListener('click', e => {
@@ -2812,6 +3531,11 @@ body.light .nav-overlay {
         updateGreeting();
         updateSummary();
         renderBudgets();
+        // Render savings goals once during initialisation so that
+        // existing goals appear on the dashboard immediately.  This
+        // must occur after loadState so that settings.savings is
+        // properly initialised from storage or Firestore.
+        renderSavings();
         renderTransactions();
         generateInsights();
         renderCharts();
@@ -2819,6 +3543,9 @@ body.light .nav-overlay {
         navigateTo('dashboard');
         // Move quick actions above AI insights after initial render
         if (typeof repositionQuickActions === 'function') repositionQuickActions();
+        // Ensure the savings section appears above budgets and apply collapsed view
+        if (typeof repositionSavings === 'function') repositionSavings();
+        if (typeof updateBudgetVisibility === 'function') updateBudgetVisibility();
         initEventListeners();
         // Update greeting every minute
         setInterval(updateGreeting, 60000);
@@ -2908,7 +3635,9 @@ body.light .nav-overlay {
   }
   
   // Reposition UI elements
-  repositionQuickActions();
+  if (typeof repositionQuickActions === 'function') repositionQuickActions();
+  if (typeof repositionSavings === 'function') repositionSavings();
+  if (typeof updateBudgetVisibility === 'function') updateBudgetVisibility();
 }
 
       /* ----- Custom Confirm Modal ----- */
