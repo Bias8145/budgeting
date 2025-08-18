@@ -2021,6 +2021,12 @@ body.light .nav-overlay {
         savings: { name: { en: 'Savings', id: 'Tabungan' }, icon: 'fa-piggy-bank', color: '#3b82f6' }
       };
 
+      // Provide a fallback entry for empty or undefined categories.  Older
+      // transactions created before bugs were fixed may have an empty
+      // category string.  Mapping it to the "other" category prevents
+      // undefined errors when rendering or processing these transactions.
+      CATEGORY_META[''] = CATEGORY_META.other;
+
       // Mapping between avatar identifiers and Font Awesome icons.  Users
       // can choose from a human, cat or flower avatar.  If more
       // animations are desired later (e.g. Lottie), they could be
@@ -2467,10 +2473,57 @@ body.light .nav-overlay {
       }
       function updateTransaction(id, updated) {
         const idx = transactions.findIndex(t => t.id === id);
-        if (idx >= 0) {
-          transactions[idx] = { ...transactions[idx], ...updated };
-          saveTransactions();
+        if (idx < 0) return;
+        const oldTx = transactions[idx];
+        // Determine existing and new categories.  When editing a transaction
+        // the category dropdown sometimes returns an empty string; in that case
+        // preserve the old category to avoid orphaning the transaction.
+        const newCategory = (updated.category !== undefined && updated.category !== '')
+          ? updated.category
+          : oldTx.category;
+        const oldCategory = oldTx.category;
+        // Determine existing and new types/amounts
+        const newType = updated.type !== undefined ? updated.type : oldTx.type;
+        const newAmount = updated.amount !== undefined ? updated.amount : oldTx.amount;
+        // Adjust the associated savings goal if needed.  We treat deposits
+        // (expense type) as positive contributions to savings and withdrawals
+        // (income type) as negative contributions.  When editing we first
+        // remove the old effect and then apply the new effect based on the
+        // edited fields and categories.
+        // Undo old effect if the transaction was previously linked to a savings goal
+        if (oldCategory === 'savings' && oldTx.savingId) {
+          const sIndex = settings.savings.findIndex(s => s.id === oldTx.savingId);
+          if (sIndex >= 0) {
+            const s = settings.savings[sIndex];
+            const oldEffect = (oldTx.type === 'expense' ? oldTx.amount : -oldTx.amount);
+            s.saved = Math.max((s.saved || 0) - oldEffect, 0);
+          }
         }
+        // Apply new effect if the updated transaction is still a savings entry
+        // and points to a valid savingId (carry forward the old savingId if not provided)
+        const newSavingId = updated.savingId !== undefined ? updated.savingId : oldTx.savingId;
+        if (newCategory === 'savings' && newSavingId) {
+          const sIndex = settings.savings.findIndex(s => s.id === newSavingId);
+          if (sIndex >= 0) {
+            const s = settings.savings[sIndex];
+            const newEffect = (newType === 'expense' ? newAmount : -newAmount);
+            s.saved = Math.max((s.saved || 0) + newEffect, 0);
+          }
+        }
+        // Merge the updated fields into the transaction, preserving the original
+        // category if it was omitted or left blank
+        const merged = { ...transactions[idx], ...updated };
+        if (updated.category === undefined || updated.category === '') {
+          merged.category = transactions[idx].category;
+        }
+        // Always preserve the savingId unless explicitly changed
+        if (updated.savingId === undefined) {
+          merged.savingId = transactions[idx].savingId;
+        }
+        transactions[idx] = merged;
+        saveTransactions();
+        saveSettings();
+        renderSavings();
       }
       function deleteTransaction(id) {
         // Attempt to locate the transaction card in the DOM using the
@@ -2481,8 +2534,26 @@ body.light .nav-overlay {
         const btnEl = document.querySelector(`#transactionsList .txn-action-btn[data-id="${id}"]`);
         const cardEl = btnEl ? btnEl.closest('.transaction-card') : null;
         const removeAndRefresh = () => {
+          // Find the transaction to be removed
+          const tx = transactions.find(t => t.id === id);
+          // If this was a savings transaction adjust the associated goal
+          if (tx && tx.category === 'savings' && tx.savingId) {
+            const sIndex = settings.savings.findIndex(s => s.id === tx.savingId);
+            if (sIndex >= 0) {
+              const s = settings.savings[sIndex];
+              if (tx.type === 'expense') {
+                // Removing a deposit subtracts from saved
+                s.saved = Math.max((s.saved || 0) - tx.amount, 0);
+              } else if (tx.type === 'income') {
+                // Removing a withdrawal adds back the amount to saved
+                s.saved = (s.saved || 0) + tx.amount;
+              }
+            }
+          }
           transactions = transactions.filter(t => t.id !== id);
           saveTransactions();
+          saveSettings();
+          renderSavings();
           renderTransactions();
           renderBudgets();
           generateInsights();
@@ -2662,8 +2733,18 @@ body.light .nav-overlay {
 
       function renderTransactions() {
         const list = document.getElementById('transactionsList');
+        // If the transactions list container does not exist (e.g. on the dashboard page)
+        // then there is nothing to render.  Early exit prevents errors when
+        // rendering transactions on pages that do not include the recent
+        // transactions section.
+        if (!list) return;
         list.innerHTML = '';
-        const activeFilter = document.querySelector('.filter-pill.active').dataset.filter;
+        // Determine the active filter.  On pages without filter pills, default to 'all'.
+        let activeFilter = 'all';
+        const activePill = document.querySelector('.filter-pill.active');
+        if (activePill && activePill.dataset && activePill.dataset.filter) {
+          activeFilter = activePill.dataset.filter;
+        }
         // Apply type filter (income/expense/all)
         let filtered = transactions;
         if (activeFilter !== 'all') {
@@ -2692,8 +2773,21 @@ body.light .nav-overlay {
         filtered.forEach(tx => {
           const card = document.createElement('div');
           card.className = 'transaction-card';
-          const meta = CATEGORY_META[tx.category];
-          // Determine background gradient by category for the icon
+          // Safely obtain metadata for the transaction's category.  Some
+          // older transactions (e.g. edited before a bug fix) may have
+          // undefined or empty categories.  To prevent runtime errors,
+          // default to the "other" category if metadata is missing.
+          let meta = CATEGORY_META[tx.category];
+          if (!meta) {
+            // Fallback to 'other' if defined, otherwise construct a
+            // minimal meta object so that rendering can proceed.
+            meta = CATEGORY_META['other'] || {
+              name: { en: tx.category || 'Unknown', id: tx.category || 'Tidak Diketahui' },
+              icon: 'fa-question',
+              color: '#6b7280'
+            };
+          }
+          // Determine background colour by category for the icon
           const bgColor = meta.color;
           card.innerHTML = `
             <div class="transaction-content">
