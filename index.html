@@ -1183,6 +1183,62 @@ body.light .nav-overlay {
     }
     body.light .txn-action-btn:hover { background: rgba(255, 255, 255, 0.5); }
 
+    /* ------------------------------------------------------------------
+       Additional animations and interactions for a richer user experience.
+       The following rules enhance feedback when interacting with cards,
+       progress bars and action panels.  These animations are subtle
+       enough to maintain a professional feel but provide a more tactile
+       feel when tapping or expanding elements.
+    ------------------------------------------------------------------ */
+    /* Scale down transaction cards slightly on click for a pressed effect */
+    .transaction-card:active {
+      transform: scale(0.97) translateX(4px);
+    }
+    /* Scale down budget cards on click */
+    .budget-card:active {
+      transform: scale(0.98) translateY(-2px);
+    }
+    /* Animate progress bar width changes smoothly */
+    .progress-fill {
+      transition: width 0.35s ease;
+    }
+    /* Fade‑out animation used when removing elements such as
+       transactions or savings.  The element will slide up slightly
+       and shrink to zero height while fading to transparency. */
+    .fade-out {
+      animation: fadeOut 0.4s forwards;
+    }
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-20px);
+        height: 0;
+        margin: 0;
+        padding: 0;
+      }
+    }
+    /* Budget actions panel animation: collapsed by default and expands
+       smoothly when toggled.  We use max-height with overflow hidden
+       because auto heights cannot be transitioned.  A generous
+       max-height ensures there is enough space for the buttons. */
+    .budget-actions-panel {
+      display: flex;
+      gap: 8px;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.35s ease, opacity 0.35s ease;
+      margin-top: 8px;
+    }
+    .budget-actions-panel.expanded {
+      max-height: 100px;
+      opacity: 1;
+    }
+
     /* Floating add button */
     .fab {
       position: fixed;
@@ -2417,12 +2473,29 @@ body.light .nav-overlay {
         }
       }
       function deleteTransaction(id) {
-        transactions = transactions.filter(t => t.id !== id);
-        saveTransactions();
-        renderTransactions();
-        renderBudgets();
-        generateInsights();
-        updateSummary();
+        // Attempt to locate the transaction card in the DOM using the
+        // data-id attribute on its action buttons.  If found, apply a
+        // fade‑out animation before removing it from the list.  The
+        // animationend event ensures the DOM is updated only after
+        // the transition completes, providing a smooth visual exit.
+        const btnEl = document.querySelector(`#transactionsList .txn-action-btn[data-id="${id}"]`);
+        const cardEl = btnEl ? btnEl.closest('.transaction-card') : null;
+        const removeAndRefresh = () => {
+          transactions = transactions.filter(t => t.id !== id);
+          saveTransactions();
+          renderTransactions();
+          renderBudgets();
+          generateInsights();
+          updateSummary();
+        };
+        if (cardEl) {
+          cardEl.classList.add('fade-out');
+          cardEl.addEventListener('animationend', () => {
+            removeAndRefresh();
+          }, { once: true });
+        } else {
+          removeAndRefresh();
+        }
       }
 
       /* ----- Rendering Functions ----- */
@@ -2555,7 +2628,6 @@ body.light .nav-overlay {
           // buttons themselves).  Labels adapt to the current language.
           const actionsPanel = document.createElement('div');
           actionsPanel.className = 'budget-actions-panel';
-          actionsPanel.style.display = 'none';
           const editLabel = settings.language === 'en' ? 'Edit Budget' : 'Ubah Anggaran';
           const resetLabel = settings.language === 'en' ? 'Reset Spending' : 'Atur Ulang Pengeluaran';
           actionsPanel.innerHTML = `
@@ -2563,9 +2635,12 @@ body.light .nav-overlay {
             <button class="budget-action-btn reset-btn" title="${resetLabel}"><i class="fas fa-rotate-left"></i></button>
           `;
           card.appendChild(actionsPanel);
+          // Toggle expansion on card click (excluding button clicks).  This
+          // adds or removes the 'expanded' class which triggers our CSS
+          // transition defined above.
           card.addEventListener('click', (ev) => {
             if (!ev.target.closest('.budget-action-btn')) {
-              actionsPanel.style.display = actionsPanel.style.display === 'none' ? 'flex' : 'none';
+              actionsPanel.classList.toggle('expanded');
             }
           });
           actionsPanel.querySelector('.edit-btn').onclick = (ev) => {
@@ -3660,19 +3735,12 @@ body.light .nav-overlay {
           // Close the confirmation modal and perform the confirmed action
           closeConfirmModal();
           if (typeof onConfirm === 'function') onConfirm();
-          // After confirming, always navigate back to the dashboard and
-          // reposition quick actions to ensure the UI is fully restored.
-          if (typeof navigateTo === 'function') navigateTo('dashboard');
+          // Reposition quick actions if present but remain on the current page
           if (typeof repositionQuickActions === 'function') repositionQuickActions();
         };
         noBtn.onclick = () => {
-          // Close the confirmation modal.  Navigating back to the dashboard
-          // ensures that any residual overlays or blurred backgrounds
-          // introduced by the confirmation are removed.  Without this the
-          // user may be left staring at a dimmed page with only the
-          // greeting visible (see bug report #8).
+          // Close the confirmation modal and remain on the current page
           closeConfirmModal();
-          if (typeof navigateTo === 'function') navigateTo('dashboard');
           if (typeof repositionQuickActions === 'function') repositionQuickActions();
         };
         openConfirmModal();
