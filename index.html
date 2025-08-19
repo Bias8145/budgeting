@@ -589,15 +589,23 @@
       color: var(--warning-color);
     }
 
+    /* Distinguish the delete action button with a danger colour.  When
+       hovered, maintain the same scale effect but highlight using the
+       warning colour for contrast. */
+    .budget-action-btn.delete-btn {
+      color: var(--danger-color);
+    }
+    .budget-action-btn.delete-btn:hover {
+      color: var(--warning-color);
+    }
+
     /* Quick actions */
     .quick-actions {
       display: grid;
-      /* Display all quick actions on a single row.  There are four buttons
-         (Add Expense, Add Income, Export and Settings) so we explicitly
-         create four equal columns.  This prevents wrapping on wider
-         screens and aligns with the requirement for four columns on
-         desktop/tablet layouts. */
-      grid-template-columns: repeat(4, 1fr);
+      /* Display all quick actions on a single row.  We now only show two buttons
+         (Add Expense and Add Income) so the grid uses two equal columns.
+         This prevents awkward spacing on wider screens. */
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       margin-bottom: 24px;
     }
@@ -643,6 +651,19 @@
       background: var(--primary-gradient);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+    }
+    /* Colour-code the quick add expense and income buttons so they stand out.
+       These overrides change the icon colour for each respective action and
+       remove the gradient. */
+    #quickAddExpense .action-icon {
+      background: none;
+      color: var(--danger-color);
+      -webkit-text-fill-color: var(--danger-color);
+    }
+    #quickAddIncome .action-icon {
+      background: none;
+      color: var(--success-color);
+      -webkit-text-fill-color: var(--success-color);
     }
     .action-label {
       font-size: 12px;
@@ -760,6 +781,79 @@
     .tip-icon { background: var(--success-gradient); }
     .warning-icon { background: var(--warning-gradient); }
     .trend-icon-small { background: var(--primary-gradient); }
+
+    /* Analysis card on the charts page.  This card provides AI‑driven
+       commentary on the user’s financial data.  Its styling is
+       consistent with the AI Insights card on the dashboard. */
+    .analysis-card {
+      background: var(--glass-bg-dark);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border-dark);
+      border-radius: 20px;
+      padding: 20px;
+      margin-top: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3), 0 12px 24px rgba(0,0,0,0.25);
+    }
+    body.light .analysis-card {
+      background: var(--glass-bg-light);
+      border-color: var(--glass-border-light);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08), 0 8px 16px rgba(0,0,0,0.05);
+    }
+    .analysis-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .analysis-card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      animation: pulse 2s infinite;
+    }
+    .analysis-card-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    /* Items within the analysis list reuse the insight-item styling for
+       consistency.  Assign specific colour classes to differentiate
+       between positive, neutral and warning insights. */
+    .analysis-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    body.light .analysis-item {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .analysis-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: white;
+    }
+    .analysis-text {
+      font-size: 14px;
+      color: var(--text-secondary-dark);
+      line-height: 1.4;
+    }
+    body.light .analysis-text {
+      color: var(--text-secondary-light);
+    }
 
     /* Charts & Estimation Section */
     .charts-section {
@@ -969,6 +1063,41 @@ body.light .nav-overlay {
     }
     body.light .daily-item label { color: var(--text-secondary-light); }
 
+    /* Monthly summary card for this month's income, expense and net */
+    .monthly-summary {
+      display: flex;
+      justify-content: space-between;
+      background: var(--glass-bg-dark);
+      border: 1px solid var(--glass-border-dark);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3), 0 12px 24px rgba(0,0,0,0.25);
+    }
+    body.light .monthly-summary {
+      background: var(--glass-bg-light);
+      border-color: var(--glass-border-light);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08), 0 8px 16px rgba(0,0,0,0.05);
+    }
+    .monthly-item {
+      flex: 1;
+      text-align: center;
+    }
+    .monthly-item span {
+      display: block;
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .monthly-item.income span { color: var(--success-color); }
+    .monthly-item.expense span { color: var(--danger-color); }
+    .monthly-item.net span { color: var(--info-color); }
+    .monthly-item label {
+      font-size: 12px;
+      color: var(--text-secondary-dark);
+    }
+    body.light .monthly-item label { color: var(--text-secondary-light); }
+
     /* Search bar within transactions section */
     .transaction-search {
       position: relative;
@@ -1037,6 +1166,92 @@ body.light .nav-overlay {
     }
     .avatar-option i {
       font-size: 20px;
+    }
+
+    /* Icon picker styles for category modal */
+    .icon-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .icon-option {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--glass-bg-dark);
+      border: 1px solid var(--glass-border-dark);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .icon-option i {
+      font-size: 18px;
+      color: var(--text-primary-dark);
+    }
+    .icon-option.selected {
+      background: var(--primary-color) !important;
+      color: var(--dark-bg) !important;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .icon-option.selected i {
+      color: var(--dark-bg) !important;
+    }
+    body.light .icon-option {
+      background: var(--glass-bg-light);
+      border-color: var(--glass-border-light);
+    }
+    body.light .icon-option i {
+      color: var(--text-primary-light);
+    }
+
+    /* Responsive adjustments for small mobile screens */
+    @media (max-width: 400px) {
+      .container {
+        padding: 0 12px 60px;
+      }
+      .balance-card {
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .transaction-card {
+        padding: 12px;
+        margin-bottom: 8px;
+      }
+      .transaction-content {
+        gap: 12px;
+      }
+      .transaction-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        font-size: 18px;
+      }
+      .transaction-title {
+        font-size: 14px;
+      }
+      .transaction-meta {
+        font-size: 10px;
+        gap: 6px;
+      }
+      .amount-value {
+        font-size: 14px;
+      }
+      .amount-type {
+        font-size: 9px;
+      }
+      .filter-pill {
+        padding: 6px 12px;
+        font-size: 10px;
+        margin-right: 4px;
+      }
+      .daily-summary, .monthly-summary {
+        padding: 8px;
+        margin-bottom: 12px;
+      }
     }
 
     /* Custom styled selects for category, theme and language */
@@ -1438,15 +1653,18 @@ body.light .nav-overlay {
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
     }
 
-    /* Ensure options are visible in dark and light themes */
-    .form-select option {
-      background: var(--card-bg);
-      color: var(--text-primary-dark);
-    }
-    body.light .form-select option {
-      background: var(--card-bg-light);
-      color: var(--text-primary-light);
-    }
+    /*
+     * Note: we intentionally avoid styling `<option>` elements here.
+     * Browser implementations render `<select>` dropdowns in their
+     * own native UI which often ignores custom CSS rules on
+     * `<option>`.  Attempting to set a dark background and light
+     * text colour caused the options list to become unreadable on
+     * some browsers.  By omitting explicit styles for `.form-select
+     * option` we allow the browser to apply the default colours,
+     * ensuring text remains visible regardless of theme.  If you need
+     * more control over the dropdown appearance, consider building a
+     * custom select component rather than relying on native `<select>`.
+     */
     .form-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1583,6 +1801,8 @@ body.light .nav-overlay {
 
     <!-- Quick Actions Section (moved above AI Insights) -->
     <div class="quick-actions" data-page="dashboard">
+      <!-- Only two quick actions remain: add expense and add income.  The export
+           and settings buttons have been removed per the user’s request. -->
       <div class="action-btn" id="quickAddExpense">
         <i class="fas fa-minus action-icon"></i>
         <span class="action-label">Add Expense</span>
@@ -1590,14 +1810,6 @@ body.light .nav-overlay {
       <div class="action-btn" id="quickAddIncome">
         <i class="fas fa-plus action-icon"></i>
         <span class="action-label">Add Income</span>
-      </div>
-      <div class="action-btn" id="quickExport">
-        <i class="fas fa-download action-icon"></i>
-        <span class="action-label">Export</span>
-      </div>
-      <div class="action-btn" id="quickSettings">
-        <i class="fas fa-gear action-icon"></i>
-        <span class="action-label">Settings</span>
       </div>
     </div>
 
@@ -1614,9 +1826,13 @@ body.light .nav-overlay {
     <div class="budget-goals" data-page="dashboard">
       <div class="section-header">
         <h2 class="section-title" id="budgetGoalsTitle">Budget Goals</h2>
-        <!-- Clicking this button will open the settings modal so users can edit their budgets.  We call
-             the globally exposed openSettingsModal function to ensure it always resolves. -->
-        <button class="view-all-btn" id="viewAllBudgets" onclick="openSettingsModal(); return false;">Edit Budgets</button>
+        <!-- Action buttons for budget goals.  The first allows users to
+             create a new transaction category even when no categories exist.  The
+             second opens the settings modal to edit budget limits. -->
+        <div class="header-actions" style="display:flex; gap:8px;">
+          <button class="view-all-btn" id="addCategoryBtn">Add Category</button>
+          <button class="view-all-btn" id="viewAllBudgets" onclick="openSettingsModal(); return false;">Edit Budgets</button>
+        </div>
       </div>
       <div id="budgetCards"></div>
       <!-- Toggle button to expand or collapse the list of budget cards.  When collapsed only a subset
@@ -1675,9 +1891,15 @@ body.light .nav-overlay {
           <canvas id="monthlySummaryChart" height="200"></canvas>
         </div>
       </div>
-      <div class="estimation-card">
-        <h4 id="estimationTitle">Projected Balance</h4>
-        <p id="estimationText">--</p>
+      <!-- AI analysis card providing expert commentary on the financial trends.
+           This replaces the old projected balance card.  The header and
+           individual insights are filled by generateChartAnalysis(). -->
+      <div class="analysis-card" id="chartAnalysis">
+        <div class="analysis-card-header">
+          <div class="analysis-card-icon"><i class="fas fa-brain"></i></div>
+          <div class="analysis-card-title" id="analysisTitle">AI Analysis</div>
+        </div>
+        <div id="analysisList"></div>
       </div>
     </div>
 
@@ -1700,6 +1922,22 @@ body.light .nav-overlay {
         <div class="daily-item expense">
           <span id="dailyExpense">-Rp 0</span>
           <label id="dailyExpenseLabel">Today Expense</label>
+        </div>
+      </div>
+
+      <!-- Monthly summary of this month's income, expense and net balance -->
+      <div class="monthly-summary" id="monthlySummary">
+        <div class="monthly-item income">
+          <span id="monthIncome">+Rp 0</span>
+          <label id="monthIncomeLabel">This Month Income</label>
+        </div>
+        <div class="monthly-item expense">
+          <span id="monthExpense">-Rp 0</span>
+          <label id="monthExpenseLabel">This Month Expense</label>
+        </div>
+        <div class="monthly-item net">
+          <span id="monthNet">Rp 0</span>
+          <label id="monthNetLabel">Net This Month</label>
         </div>
       </div>
       <!-- Search bar for filtering transactions -->
@@ -1819,6 +2057,32 @@ body.light .nav-overlay {
     </div>
   </div>
 
+  <!-- Add Category Modal -->
+  <!--
+    Modal used to create a new spending category.  Replaces the
+    prompt-based category creation with a proper form.  Users
+    specify a name and choose an icon from a predefined set.  A
+    random colour is assigned automatically.  Labels and buttons
+    are localised via updateText().
+  -->
+  <div class="modal" id="categoryModal">
+    <div class="modal-content">
+      <h3 class="modal-title" id="categoryModalTitle">Add Category</h3>
+      <div class="form-group">
+        <label class="form-label" id="labelCategoryName">Category Name</label>
+        <input type="text" class="form-input" id="categoryNameInput" placeholder="" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="labelCategoryIcon">Icon</label>
+        <div class="icon-options" id="iconOptions"></div>
+      </div>
+      <div class="form-buttons">
+        <button class="btn btn-cancel" id="categoryCancel">Cancel</button>
+        <button class="btn btn-save" id="categorySave">Save</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Alert Panel -->
   <!--
     A simple custom alert panel used to display error or informational messages.
@@ -1843,6 +2107,9 @@ body.light .nav-overlay {
       <button class="nav-item" data-target="charts" title="Charts"><i class="fas fa-chart-line"></i></button>
       <!-- Logout button; uses the same nav-item style for consistency -->
       <button class="nav-item" id="logoutBtn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+      <!-- Settings has been relocated from the quick actions to the navigation
+           menu.  Clicking this button opens the settings modal. -->
+      <button class="nav-item" id="navSettings" title="Settings"><i class="fas fa-gear"></i></button>
     </div>
   </div>
   <!-- Overlay that blurs the content when navigation menu is open -->
@@ -1881,6 +2148,18 @@ body.light .nav-overlay {
           <option value="freelance">Freelance</option>
           <option value="other">Other</option>
         </select>
+      </div>
+
+      <!-- Icon field for transaction -->
+      <div class="form-group">
+        <label class="form-label" id="labelTxIcon">Icon</label>
+        <div class="icon-options" id="transactionIconOptions"></div>
+      </div>
+
+      <!-- Date field for transaction -->
+      <div class="form-group">
+        <label class="form-label" id="labelDate">Date</label>
+        <input type="date" class="form-input" id="transactionDate" />
       </div>
       <div class="form-group">
         <label class="form-label" id="labelDesc">Description</label>
@@ -1988,39 +2267,35 @@ body.light .nav-overlay {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
       }
 
-      // Default budgets per category (IDR)
-      const DEFAULT_BUDGETS = {
-        food: 1000000,
-        shopping: 800000,
-        transport: 500000,
-        entertainment: 600000,
-        salary: Infinity,
-        freelance: Infinity,
-        other: 500000,
-        // No budget limit for savings; contributions are treated separately from spending
-        savings: Infinity
-      };
+      // A list of default categories.  Each entry defines a unique id,
+      // translated names for English and Indonesian, an associated Font
+      // Awesome icon class and a default monthly budget.  Budgets for
+      // income sources (like salary or freelance) and savings are set to
+      // Infinity to indicate no spending limit.
+      const DEFAULT_CATEGORIES = [
+        { id: 'food', name: { en: 'Food & Dining', id: 'Makanan & Minuman' }, icon: 'fa-utensils', color: '#f97316', budget: 1000000 },
+        { id: 'shopping', name: { en: 'Shopping', id: 'Belanja' }, icon: 'fa-cart-shopping', color: '#7c3aed', budget: 800000 },
+        { id: 'transport', name: { en: 'Transport', id: 'Transportasi' }, icon: 'fa-car', color: '#eab308', budget: 500000 },
+        { id: 'entertainment', name: { en: 'Entertainment', id: 'Hiburan' }, icon: 'fa-gamepad', color: '#7c3aed', budget: 600000 },
+        { id: 'salary', name: { en: 'Salary', id: 'Gaji' }, icon: 'fa-money-bill', color: '#22c55e', budget: Infinity },
+        { id: 'freelance', name: { en: 'Freelance', id: 'Freelance' }, icon: 'fa-briefcase', color: '#eab308', budget: Infinity },
+        { id: 'other', name: { en: 'Other', id: 'Lainnya' }, icon: 'fa-ellipsis', color: '#22c55e', budget: 500000 },
+        // Savings is a special category used for transfers into/out of savings goals.
+        // It does not count toward spending budgets.
+        { id: 'savings', name: { en: 'Savings', id: 'Tabungan' }, icon: 'fa-piggy-bank', color: '#3b82f6', budget: Infinity }
+      ];
 
-      // Category metadata for icons and colours (for cards and progress bars)
-      const CATEGORY_META = {
-        // Colours mapped to a restrained palette.  Multiple categories share
-        // the same base colours to avoid an overly busy look while still
-        // maintaining distinction in charts.  Colours reflect the CSS root
-        // variables defined above.
-        food: { name: { en: 'Food & Dining', id: 'Makanan & Minuman' }, icon: 'fa-utensils', color: '#f97316' },
-        shopping: { name: { en: 'Shopping', id: 'Belanja' }, icon: 'fa-cart-shopping', color: '#7c3aed' },
-        transport: { name: { en: 'Transport', id: 'Transportasi' }, icon: 'fa-car', color: '#eab308' },
-        entertainment: { name: { en: 'Entertainment', id: 'Hiburan' }, icon: 'fa-gamepad', color: '#7c3aed' },
-        salary: { name: { en: 'Salary', id: 'Gaji' }, icon: 'fa-money-bill', color: '#22c55e' },
-        freelance: { name: { en: 'Freelance', id: 'Freelance' }, icon: 'fa-briefcase', color: '#eab308' },
-        other: { name: { en: 'Other', id: 'Lainnya' }, icon: 'fa-ellipsis', color: '#22c55e' },
-        // Savings category is used for transactions representing transfers
-        // into or out of a savings goal.  It is hidden from budget
-        // calculations but appears in transaction lists and charts.  A
-        // cheerful blue emphasises the aspirational nature of savings.
-        savings: { name: { en: 'Savings', id: 'Tabungan' }, icon: 'fa-piggy-bank', color: '#3b82f6' }
-      };
-
+      // Build default budget and metadata objects from the category list.  These
+      // variables are declared with `let` so that custom categories added by the
+      // user can extend them at runtime.  The objects are keyed by the
+      // category id and map to their default budget and descriptive
+      // information (names, icon and colour).
+      let DEFAULT_BUDGETS = {};
+      let CATEGORY_META = {};
+      DEFAULT_CATEGORIES.forEach(cat => {
+        DEFAULT_BUDGETS[cat.id] = cat.budget;
+        CATEGORY_META[cat.id] = { name: { ...cat.name }, icon: cat.icon, color: cat.color };
+      });
       // Provide a fallback entry for empty or undefined categories.  Older
       // transactions created before bugs were fixed may have an empty
       // category string.  Mapping it to the "other" category prevents
@@ -2036,6 +2311,29 @@ body.light .nav-overlay {
         cat: 'fa-cat',
         flower: 'fa-seedling'
       };
+
+      // Predefined list of Font Awesome icons available for custom categories.
+      // These icons are sourced from the free solid icon set and provide
+      // a variety of common motifs (food, shopping, transport, leisure,
+      // finance, and more).  Users pick one of these when creating a
+      // custom category via the new category modal.  Feel free to extend
+      // this list with additional icons as needed.
+      const ICON_OPTIONS_LIST = [
+        'fa-utensils',
+        'fa-cart-shopping',
+        'fa-car',
+        'fa-gamepad',
+        'fa-money-bill',
+        'fa-coffee',
+        'fa-book',
+        'fa-heart',
+        'fa-gift',
+        'fa-home',
+        'fa-film',
+        'fa-bolt',
+        'fa-plane',
+        'fa-medkit'
+      ];
 
       // Translations for interface text
       const TRANSLATIONS = {
@@ -2093,6 +2391,20 @@ body.light .nav-overlay {
         , withdraw: 'Withdraw'
         , noSavings: 'No savings'
         , deleteSaving: 'Delete Saving'
+        , addCategory: 'Add Category'
+        , categoryName: 'Category Name'
+        , categoryIcon: 'Icon'
+        , date: 'Date'
+        , icon: 'Icon'
+        , monthIncome: 'This Month Income'
+        , monthExpense: 'This Month Expense'
+        , monthNet: 'Net This Month'
+        , chartAnalysisTitle: 'AI Analysis'
+        , noBudgets: 'No budget goals'
+        , noCategories: 'No transaction categories. Add one first'
+        , deleteCategory: 'Delete'
+        , deleteCategoryConfirm: 'Delete this category?'
+        , noChartsData: 'No data this month to analyse'
         },
         id: {
           availableBalance: 'Saldo Tersedia',
@@ -2148,6 +2460,20 @@ body.light .nav-overlay {
         , withdraw: 'Tarik'
         , noSavings: 'Belum ada tabungan'
         , deleteSaving: 'Hapus Tabungan'
+        , addCategory: 'Tambah Kategori'
+        , categoryName: 'Nama Kategori'
+        , categoryIcon: 'Ikon'
+        , date: 'Tanggal'
+        , icon: 'Ikon'
+        , monthIncome: 'Pendapatan Bulan Ini'
+        , monthExpense: 'Pengeluaran Bulan Ini'
+        , monthNet: 'Bersih Bulan Ini'
+        , chartAnalysisTitle: 'Analisis AI'
+        , noBudgets: 'Belum ada target anggaran'
+        , noCategories: 'Belum ada kategori transaksi. Tambahkan terlebih dahulu'
+        , deleteCategory: 'Hapus'
+        , deleteCategoryConfirm: 'Hapus kategori ini?'
+        , noChartsData: 'Belum ada data bulan ini untuk dianalisis'
         }
       };
 
@@ -2158,6 +2484,17 @@ body.light .nav-overlay {
         theme: 'dark',
         language: 'en',
         avatar: 'user',
+        // Dynamic category definitions.  Each entry mirrors the
+        // DEFAULT_CATEGORIES list and allows the user to add their own
+        // categories at runtime.  When undefined, this property will be
+        // initialised to a shallow copy of DEFAULT_CATEGORIES in
+        // loadState().
+        // Start with no transaction categories.  Users must create
+        // categories via the "Add Category" option before adding
+        // transactions.  Default categories are still defined in
+        // DEFAULT_CATEGORIES for reference but are not added
+        // automatically.
+        categories: [],
         budgets: { ...DEFAULT_BUDGETS },
         // Array of savings goals.  Each entry has id, name, target,
         // saved, deposit (mandatory contribution amount) and frequency
@@ -2234,6 +2571,44 @@ body.light .nav-overlay {
           if (!Array.isArray(settings.savings)) {
             settings.savings = [];
           }
+          // Ensure the categories array exists.  Previous versions of the app
+          // did not support custom categories, so this property may be
+          // missing.  Initialise it with a shallow copy of the default
+          // categories.  After initialising, merge each category into
+          // CATEGORY_META and DEFAULT_BUDGETS if not already present.  Also
+          // initialise a budget entry in settings.budgets if undefined.
+          // Initialise the categories array if missing.  We start with
+          // an empty list so that users can add their own transaction
+          // categories.  Default categories defined in DEFAULT_CATEGORIES
+          // are no longer automatically added here.  This encourages
+          // users to create categories explicitly instead of being
+          // presented with a prefilled list.
+          if (!Array.isArray(settings.categories)) {
+            settings.categories = [];
+          }
+          // Iterate over any existing categories in settings and merge
+          // their metadata and budgets into the global maps.  When
+          // creating a new category through the UI, DEFAULT_BUDGETS and
+          // CATEGORY_META are updated accordingly.  We avoid merging
+          // DEFAULT_CATEGORIES here to keep the initial list empty.
+          settings.categories.forEach(cat => {
+            // Add metadata for the category if missing
+            if (!CATEGORY_META[cat.id]) {
+              CATEGORY_META[cat.id] = { name: { ...cat.name }, icon: cat.icon, color: cat.color };
+            }
+            // Add a default budget for the category if defined on the
+            // category object; otherwise treat as unlimited (Infinity)
+            if (DEFAULT_BUDGETS[cat.id] === undefined) {
+              DEFAULT_BUDGETS[cat.id] = (cat.budget !== undefined ? cat.budget : Infinity);
+            }
+            // Ensure a budget entry exists in user settings.  If the
+            // category was added after the settings were created, the
+            // budget may be undefined here.  We default to Infinity so
+            // spending is not constrained until the user sets a limit.
+            if (settings.budgets[cat.id] === undefined) {
+              settings.budgets[cat.id] = (cat.budget !== undefined ? cat.budget : Infinity);
+            }
+          });
           } catch (err) {
             console.error('Error loading state:', err);
             transactions = [];
@@ -2338,6 +2713,9 @@ body.light .nav-overlay {
         document.getElementById('labelAmount').textContent = t.amount;
         document.getElementById('labelCategory').textContent = t.category;
         document.getElementById('labelDesc').textContent = t.description;
+        // Update transaction icon label if present
+        const txIconLabel = document.getElementById('labelTxIcon');
+        if (txIconLabel) txIconLabel.textContent = t.icon;
         document.getElementById('transactionCancel').textContent = t.cancel;
         document.getElementById('transactionSave').textContent = t.save;
         document.getElementById('settingsTitle').textContent = t.settings;
@@ -2353,17 +2731,25 @@ body.light .nav-overlay {
         pills[0].textContent = settings.language === 'en' ? 'All' : 'Semua';
         pills[1].textContent = settings.language === 'en' ? 'Income' : 'Pemasukan';
         pills[2].textContent = settings.language === 'en' ? 'Expense' : 'Pengeluaran';
-        // Update quick action labels
-        document.querySelector('#quickAddExpense .action-label').textContent = t.addExpense;
-        document.querySelector('#quickAddIncome .action-label').textContent = t.addIncome;
-        document.querySelector('#quickExport .action-label').textContent = t.export;
-        document.querySelector('#quickSettings .action-label').textContent = t.settings;
+        // Update quick action labels.  Only expense and income actions remain on
+        // the dashboard; export and settings have been removed from quick actions.
+        const qaExpense = document.querySelector('#quickAddExpense .action-label');
+        if (qaExpense) qaExpense.textContent = t.addExpense;
+        const qaIncome = document.querySelector('#quickAddIncome .action-label');
+        if (qaIncome) qaIncome.textContent = t.addIncome;
+        // Update the Add Category button on the budget goals section
+        const addCatBtn = document.getElementById('addCategoryBtn');
+        if (addCatBtn) addCatBtn.textContent = t.addCategory;
+        // Update the Settings button in the navigation menu (tooltip)
+        const navSettingsBtn = document.getElementById('navSettings');
+        if (navSettingsBtn) navSettingsBtn.title = t.settings;
 
         // Update charts section titles
         const chartsTitleEl = document.getElementById('chartsTitle');
         if (chartsTitleEl) chartsTitleEl.textContent = t.financialCharts;
-        const estimationTitleEl = document.getElementById('estimationTitle');
-        if (estimationTitleEl) estimationTitleEl.textContent = t.projectedBalance;
+        // Update analysis card title on charts page
+        const analysisTitleEl = document.getElementById('analysisTitle');
+        if (analysisTitleEl) analysisTitleEl.textContent = t.chartAnalysisTitle;
 
         // Update search placeholder and daily summary labels
         const searchInput = document.getElementById('transactionSearch');
@@ -2372,6 +2758,14 @@ body.light .nav-overlay {
         const dailyExpenseLabel = document.getElementById('dailyExpenseLabel');
         if (dailyIncomeLabel) dailyIncomeLabel.textContent = t.todayIncome;
         if (dailyExpenseLabel) dailyExpenseLabel.textContent = t.todayExpense;
+
+        // Update monthly summary labels
+        const monthIncomeLabel = document.getElementById('monthIncomeLabel');
+        const monthExpenseLabel = document.getElementById('monthExpenseLabel');
+        const monthNetLabel = document.getElementById('monthNetLabel');
+        if (monthIncomeLabel) monthIncomeLabel.textContent = t.monthIncome;
+        if (monthExpenseLabel) monthExpenseLabel.textContent = t.monthExpense;
+        if (monthNetLabel) monthNetLabel.textContent = t.monthNet;
 
         // Update Reset Data button text if it exists
         const resetBtn = document.getElementById('resetDataBtn');
@@ -2402,6 +2796,21 @@ body.light .nav-overlay {
         if (savingTransCancelBtn) savingTransCancelBtn.textContent = t.cancel;
         const savingTransSaveBtn = document.getElementById('savingTransSave');
         if (savingTransSaveBtn) savingTransSaveBtn.textContent = t.save;
+
+        // Update date label in transaction modal
+        const lblDate = document.getElementById('labelDate');
+        if (lblDate) lblDate.textContent = t.date;
+        // Update category modal translations
+        const catModalTitle = document.getElementById('categoryModalTitle');
+        if (catModalTitle) catModalTitle.textContent = t.addCategory;
+        const lblCatName = document.getElementById('labelCategoryName');
+        if (lblCatName) lblCatName.textContent = t.categoryName;
+        const lblCatIcon = document.getElementById('labelCategoryIcon');
+        if (lblCatIcon) lblCatIcon.textContent = t.categoryIcon;
+        const catCancelBtn = document.getElementById('categoryCancel');
+        if (catCancelBtn) catCancelBtn.textContent = t.cancel;
+        const catSaveBtn = document.getElementById('categorySave');
+        if (catSaveBtn) catSaveBtn.textContent = t.save;
 
         // Update logout button tooltip.  The logout button is icon-only,
         // so we use its title attribute for localisation.  If the button
@@ -2611,8 +3020,9 @@ body.light .nav-overlay {
           trendIcon.classList.add('fa-trending-down');
         }
 
-        // After updating summary, refresh today's summary and charts
+        // After updating summary, refresh today's and monthly summaries and charts
         updateDailySummary();
+        updateMonthlySummary();
         renderCharts();
       }
 
@@ -2635,6 +3045,147 @@ body.light .nav-overlay {
         if (expEl) expEl.textContent = (expenseTotal > 0 ? '-' : '') + formatCurrency(expenseTotal);
       }
 
+      // Compute this month's total income, expense and net balance and update
+      // the monthly summary card.  Net balance colour is set based on
+      // whether the net is positive (success colour) or negative (danger colour).
+      function updateMonthlySummary() {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        let incomeTotal = 0;
+        let expenseTotal = 0;
+        transactions.forEach(t => {
+          const d = new Date(t.date);
+          if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+            if (t.type === 'income') incomeTotal += t.amount;
+            else expenseTotal += t.amount;
+          }
+        });
+        const netTotal = incomeTotal - expenseTotal;
+        const incEl = document.getElementById('monthIncome');
+        const expEl = document.getElementById('monthExpense');
+        const netEl = document.getElementById('monthNet');
+        if (incEl) incEl.textContent = (incomeTotal > 0 ? '+' : '') + formatCurrency(incomeTotal);
+        if (expEl) expEl.textContent = (expenseTotal > 0 ? '-' : '') + formatCurrency(expenseTotal);
+        if (netEl) {
+          netEl.textContent = formatCurrency(netTotal);
+          // Set colour: success for positive or zero, danger for negative
+          if (netTotal >= 0) {
+            netEl.style.color = getComputedStyle(document.documentElement).getPropertyValue('--success-color');
+          } else {
+            netEl.style.color = getComputedStyle(document.documentElement).getPropertyValue('--danger-color');
+          }
+        }
+      }
+
+      /*
+       * Populate the category dropdown in the transaction modal.  This
+       * function clears any existing options on the `<select>` element
+       * with id `transactionCategory` and rebuilds them from
+       * `settings.categories`.  An additional option labelled "Add
+       * Category…" is appended which, when chosen, triggers the
+       * creation of a new custom category via `addNewCategory()`.  The
+       * `savings` category is deliberately excluded from the list as
+       * savings transactions are handled separately through the savings
+       * goal interface.
+       */
+      function populateCategoryOptions() {
+        const select = document.getElementById('transactionCategory');
+        if (!select) return;
+        // Choose the list of categories to display.  We no longer merge
+        // built‑in default categories here; only categories that the
+        // user has explicitly created (stored in settings.categories)
+        // appear in the dropdown.  This ensures the list reflects
+        // exactly what the user has defined.  If settings.categories is
+        // undefined or empty, cats will be an empty array.
+        const cats = Array.isArray(settings.categories)
+          ? settings.categories.slice()
+          : [];
+        // Remove any existing options
+        select.innerHTML = '';
+        // Build the list from combined categories (excluding savings)
+        cats.forEach(catObj => {
+          // Skip savings category and any category hidden by the user
+          if (catObj.id === 'savings' || catObj.hidden) return;
+          const option = document.createElement('option');
+          option.value = catObj.id;
+          const meta = CATEGORY_META[catObj.id] || { name: { en: catObj.name.en, id: catObj.name.id } };
+          option.textContent = meta.name[settings.language] || meta.name.en;
+          select.appendChild(option);
+        });
+        // Special option for adding a new category.  Use translated
+        // label from the dictionary.  Append an ellipsis to hint
+        // that it opens a new dialog.
+        const addOption = document.createElement('option');
+        addOption.value = '__add__';
+        const t = TRANSLATIONS[settings.language] || TRANSLATIONS.en;
+        addOption.textContent = (t.addCategory || 'Add Category') + '…';
+        select.appendChild(addOption);
+      }
+
+      /*
+       * Prompt the user to create a new category.  This helper uses
+       * `prompt()` to capture a category name and icon class from the
+       * user.  If the user cancels or leaves the name blank, the
+       * operation is aborted.  A unique id is generated by
+       * normalising the name and appending an incrementing suffix if
+       * needed.  The resulting category is pushed into
+       * `settings.categories`, metadata and budgets are updated, and
+       * settings are persisted.  The function returns the id of the
+       * new category or null if cancelled.
+       */
+      function addNewCategory() {
+        let name = prompt(settings.language === 'en' ? 'Enter category name:' : 'Masukkan nama kategori:');
+        if (!name) return null;
+        name = name.trim();
+        if (!name) return null;
+        // Prompt for Font Awesome icon.  Allow input without the `fa-` prefix.
+        let icon = prompt(settings.language === 'en'
+          ? 'Enter Font Awesome icon class (e.g. coffee for fa-coffee). Leave blank for default:'
+          : 'Masukkan kelas ikon Font Awesome (mis. coffee untuk fa-coffee). Kosongkan untuk default:');
+        if (!icon || !icon.trim()) {
+          icon = 'fa-tag';
+        } else {
+          icon = icon.trim();
+          if (!icon.startsWith('fa-')) {
+            icon = 'fa-' + icon;
+          }
+        }
+        // Generate a base id by normalising the name
+        const base = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        // Ensure the id is not empty
+        const baseId = base || 'custom';
+        let uniqueId = baseId;
+        let counter = 1;
+        while (settings.categories.some(c => c.id === uniqueId) || uniqueId === 'savings') {
+          uniqueId = `${baseId}_${counter++}`;
+        }
+        // Choose a random colour from a limited palette for the new category
+        const palette = ['#f97316','#7c3aed','#eab308','#22c55e','#dc2626','#3b82f6','#fbbf24','#10b981','#f87171','#8b5cf6'];
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        // Build the category object.  Use the same name for English and Indonesian
+        const newCat = {
+          id: uniqueId,
+          name: { en: name, id: name },
+          icon: icon,
+          color: color,
+          budget: Infinity
+        };
+        // Append to settings.categories
+        settings.categories.push(newCat);
+        // Update metadata and budgets
+        CATEGORY_META[uniqueId] = { name: { en: name, id: name }, icon: icon, color: color };
+        DEFAULT_BUDGETS[uniqueId] = Infinity;
+        settings.budgets[uniqueId] = Infinity;
+        // Persist updated settings
+        saveSettings();
+        // Update budgets display and other dependent UI
+        renderBudgets();
+        generateInsights();
+        updateSummary();
+        return uniqueId;
+      }
+
       function renderBudgets() {
         const container = document.getElementById('budgetCards');
         container.innerHTML = '';
@@ -2649,8 +3200,25 @@ body.light .nav-overlay {
         });
         // Skip the 'savings' category when rendering budget cards.  Savings
         // contributions are managed separately and should not count
-        // towards spending limits in the budget overview.
-        Object.keys(CATEGORY_META).filter(cat => cat !== 'savings').forEach(cat => {
+        // towards spending limits in the budget overview.  Iterate over
+        // the categories defined in user settings to support custom
+        // categories.
+        // Only show categories that are not savings and not hidden by the user
+        const categoriesToShow = (Array.isArray(settings.categories) ? settings.categories : []).filter(c => c.id !== 'savings' && !c.hidden);
+        // When there are no budget categories to display, show a friendly message
+        if (categoriesToShow.length === 0) {
+          const noEl = document.createElement('div');
+          noEl.className = 'empty-message';
+          noEl.style.textAlign = 'center';
+          noEl.style.color = settings.theme === 'light' ? '#6b7280' : '#9ca3af';
+          noEl.textContent = TRANSLATIONS[settings.language].noBudgets;
+          container.appendChild(noEl);
+          // Still reposition savings above the message
+          if (typeof repositionSavings === 'function') repositionSavings();
+          return;
+        }
+        categoriesToShow.forEach(catObj => {
+          const cat = catObj.id;
           const meta = CATEGORY_META[cat];
           // Determine the budget for this category.  Treat any non‑finite or
           // non‑positive values (including null or empty) as having no limit.
@@ -2704,6 +3272,7 @@ body.light .nav-overlay {
           actionsPanel.innerHTML = `
             <button class="budget-action-btn edit-btn" title="${editLabel}"><i class="fas fa-edit"></i></button>
             <button class="budget-action-btn reset-btn" title="${resetLabel}"><i class="fas fa-rotate-left"></i></button>
+            <button class="budget-action-btn delete-btn" title="${TRANSLATIONS[settings.language].deleteCategory}"><i class="fas fa-trash"></i></button>
           `;
           card.appendChild(actionsPanel);
           // Toggle expansion on card click (excluding button clicks).  This
@@ -2721,6 +3290,15 @@ body.light .nav-overlay {
           actionsPanel.querySelector('.reset-btn').onclick = (ev) => {
             ev.stopPropagation();
             resetCategorySpent(cat);
+          };
+          // Delete button hides this category from the budgets display.  It
+          // prompts the user for confirmation before proceeding.
+          actionsPanel.querySelector('.delete-btn').onclick = (ev) => {
+            ev.stopPropagation();
+            const msg = TRANSLATIONS[settings.language].deleteCategoryConfirm;
+            showConfirm(msg, () => {
+              deleteCategory(cat);
+            });
           };
           container.appendChild(card);
         });
@@ -2788,10 +3366,13 @@ body.light .nav-overlay {
             };
           }
           // Determine background colour by category for the icon
-          const bgColor = meta.color;
+          // Determine icon and colour: use transaction-level values when
+          // provided, otherwise fall back to the category metadata.
+          const txIcon = tx.icon || meta.icon;
+          const txColor = tx.color || meta.color;
           card.innerHTML = `
             <div class="transaction-content">
-              <div class="transaction-icon" style="background:${bgColor};"><i class="fas ${meta.icon}"></i></div>
+              <div class="transaction-icon" style="background:${txColor};"><i class="fas ${txIcon}"></i></div>
               <div class="transaction-details">
                 <div class="transaction-title">${meta.name[settings.language]}</div>
                 <div class="transaction-meta">
@@ -2819,73 +3400,130 @@ body.light .nav-overlay {
         insightsContainer.innerHTML = '';
         const now = new Date();
         const currentMonth = now.getMonth();
-        // Gather total expenses by category for this month
-        const totals = {};
+        const currentYear = now.getFullYear();
+        // Aggregate totals for the current month
+        let monthIncome = 0;
+        let monthExpense = 0;
+        const expenseTotals = {};
+        const incomeTotals = {};
         transactions.forEach(tx => {
           const d = new Date(tx.date);
-          if (d.getMonth() === currentMonth && d.getFullYear() === now.getFullYear() && tx.type === 'expense') {
-            totals[tx.category] = (totals[tx.category] || 0) + tx.amount;
+          if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) {
+            if (tx.type === 'income') {
+              monthIncome += tx.amount;
+              incomeTotals[tx.category] = (incomeTotals[tx.category] || 0) + tx.amount;
+            } else if (tx.type === 'expense') {
+              monthExpense += tx.amount;
+              expenseTotals[tx.category] = (expenseTotals[tx.category] || 0) + tx.amount;
+            }
           }
         });
-        // Check budgets and generate tips
-        Object.keys(CATEGORY_META).forEach(cat => {
-          const spent = totals[cat] || 0;
+        const monthNet = monthIncome - monthExpense;
+        // Determine top spending and income categories
+        let topExpenseCat = null;
+        let topExpenseAmt = 0;
+        Object.keys(expenseTotals).forEach(cat => {
+          if (expenseTotals[cat] > topExpenseAmt) {
+            topExpenseAmt = expenseTotals[cat];
+            topExpenseCat = cat;
+          }
+        });
+        let topIncomeCat = null;
+        let topIncomeAmt = 0;
+        Object.keys(incomeTotals).forEach(cat => {
+          if (incomeTotals[cat] > topIncomeAmt) {
+            topIncomeAmt = incomeTotals[cat];
+            topIncomeCat = cat;
+          }
+        });
+        // Analyse budgets for warnings or kudos
+        const budgetInsights = [];
+        (Array.isArray(settings.categories) ? settings.categories : []).forEach(catObj => {
+          if (catObj.id === 'savings' || catObj.hidden) return;
+          const cat = catObj.id;
           const budget = settings.budgets[cat] === undefined ? DEFAULT_BUDGETS[cat] : settings.budgets[cat];
-          if (budget === Infinity) return;
+          if (budget === Infinity || !budget || isNaN(budget)) return;
+          const spent = expenseTotals[cat] || 0;
           const ratio = spent / budget;
-          const meta = CATEGORY_META[cat];
-          if (ratio >= 0.8) {
-            const item = document.createElement('div');
-            item.className = 'insight-item';
-            item.innerHTML = `
-              <div class="insight-icon warning-icon"><i class="fas fa-exclamation-triangle"></i></div>
-              <div class="insight-text">${settings.language === 'en'
-                ? `You have used ${Math.round(ratio * 100)}% of your ${meta.name.en} budget.`
-                : `Anda telah menggunakan ${Math.round(ratio * 100)}% dari anggaran ${meta.name.id}.`}</div>
-            `;
-            insightsContainer.appendChild(item);
-          } else if (ratio <= 0.5 && spent > 0) {
-            const item = document.createElement('div');
-            item.className = 'insight-item';
-            item.innerHTML = `
-              <div class="insight-icon tip-icon"><i class="fas fa-check-circle"></i></div>
-              <div class="insight-text">${settings.language === 'en'
-                ? `Great! Only ${Math.round(ratio * 100)}% of your ${meta.name.en} budget used.`
-                : `Bagus! Baru ${Math.round(ratio * 100)}% dari anggaran ${meta.name.id} terpakai.`}</div>
-            `;
-            insightsContainer.appendChild(item);
+          if (ratio >= 1) {
+            budgetInsights.push({
+              type: 'over',
+              cat,
+              amount: spent - budget
+            });
+          } else if (ratio >= 0.8) {
+            budgetInsights.push({
+              type: 'near',
+              cat,
+              amount: budget - spent
+            });
+          } else if (spent > 0 && ratio <= 0.3) {
+            budgetInsights.push({
+              type: 'good',
+              cat,
+              amount: ratio
+            });
           }
         });
-        // Show general savings tip if balance positive this month
-        const thisMonthBalance = transactions.reduce((sum, tx) => {
-          const d = new Date(tx.date);
-          if (d.getMonth() === currentMonth && d.getFullYear() === now.getFullYear()) {
-            return sum + (tx.type === 'income' ? tx.amount : -tx.amount);
+        const items = [];
+        // If there are no transactions this month, encourage user to add some
+        if (monthIncome === 0 && monthExpense === 0) {
+          items.push({ icon: 'fa-lightbulb', bgClass: 'trend-icon-small', text: settings.language === 'en'
+            ? 'Add some transactions to see insights.'
+            : 'Tambahkan transaksi untuk melihat wawasan.' });
+        } else {
+          // Net balance insight
+          items.push({ icon: monthNet >= 0 ? 'fa-arrow-up' : 'fa-arrow-down', bgClass: monthNet >= 0 ? 'tip-icon' : 'warning-icon', text: settings.language === 'en'
+            ? `Net balance this month: ${formatCurrency(monthNet)}.`
+            : `Saldo bersih bulan ini: ${formatCurrency(monthNet)}.` });
+          // Income vs expense insight
+          items.push({ icon: monthIncome >= monthExpense ? 'fa-coins' : 'fa-wallet', bgClass: monthIncome >= monthExpense ? 'tip-icon' : 'warning-icon', text: settings.language === 'en'
+            ? `Income: ${formatCurrency(monthIncome)}, expenses: ${formatCurrency(monthExpense)}.`
+            : `Pemasukan: ${formatCurrency(monthIncome)}, pengeluaran: ${formatCurrency(monthExpense)}.` });
+          // Top expense category
+          if (topExpenseCat) {
+            const meta = CATEGORY_META[topExpenseCat];
+            items.push({ icon: 'fa-chart-pie', bgClass: 'trend-icon-small', text: settings.language === 'en'
+              ? `Highest spending in ${meta.name.en}: ${formatCurrency(topExpenseAmt)}.`
+              : `Pengeluaran terbesar pada ${meta.name.id}: ${formatCurrency(topExpenseAmt)}.` });
           }
-          return sum;
-        }, 0);
-        if (thisMonthBalance > 0) {
-          const item = document.createElement('div');
-          item.className = 'insight-item';
-          item.innerHTML = `
-            <div class="insight-icon trend-icon-small"><i class="fas fa-chart-line"></i></div>
-            <div class="insight-text">${settings.language === 'en'
-              ? 'Nice! You saved money this month.'
-              : 'Bagus! Anda menabung bulan ini.'}</div>
-          `;
-          insightsContainer.appendChild(item);
+          // Top income category
+          if (topIncomeCat) {
+            const meta = CATEGORY_META[topIncomeCat];
+            items.push({ icon: 'fa-hand-holding-dollar', bgClass: 'trend-icon-small', text: settings.language === 'en'
+              ? `Largest income from ${meta.name.en}: ${formatCurrency(topIncomeAmt)}.`
+              : `Pemasukan terbesar dari ${meta.name.id}: ${formatCurrency(topIncomeAmt)}.` });
+          }
+          // Budget specific insights
+          budgetInsights.forEach(b => {
+            const meta = CATEGORY_META[b.cat];
+            if (b.type === 'over') {
+              items.push({ icon: 'fa-bell', bgClass: 'warning-icon', text: settings.language === 'en'
+                ? `You exceeded your ${meta.name.en} budget by ${formatCurrency(b.amount)}.`
+                : `Anda melebihi anggaran ${meta.name.id} sebesar ${formatCurrency(b.amount)}.` });
+            } else if (b.type === 'near') {
+              items.push({ icon: 'fa-exclamation-circle', bgClass: 'warning-icon', text: settings.language === 'en'
+                ? `You are close to your ${meta.name.en} budget.`
+                : `Anda hampir mencapai anggaran ${meta.name.id}.` });
+            } else if (b.type === 'good') {
+              // ratio stored in amount for 'good'
+              const percent = Math.round(b.amount * 100);
+              items.push({ icon: 'fa-check-circle', bgClass: 'tip-icon', text: settings.language === 'en'
+                ? `Great! Only ${percent}% of your ${meta.name.en} budget used.`
+                : `Bagus! Baru ${percent}% dari anggaran ${meta.name.id} terpakai.` });
+            }
+          });
         }
-        if (insightsContainer.children.length === 0) {
-          const item = document.createElement('div');
-          item.className = 'insight-item';
-          item.innerHTML = `
-            <div class="insight-icon trend-icon-small"><i class="fas fa-lightbulb"></i></div>
-            <div class="insight-text">${settings.language === 'en'
-              ? 'Add some transactions to see insights.'
-              : 'Tambahkan transaksi untuk melihat wawasan.'}</div>
+        // Render all insight items
+        items.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'insight-item';
+          div.innerHTML = `
+            <div class="insight-icon ${item.bgClass}"><i class="fas ${item.icon}"></i></div>
+            <div class="insight-text">${item.text}</div>
           `;
-          insightsContainer.appendChild(item);
-        }
+          insightsContainer.appendChild(div);
+        });
       }
 
       function checkAchievements(newTx) {
@@ -3161,35 +3799,227 @@ body.light .nav-overlay {
       /* ----- Modal controls ----- */
       function openTransactionModal(editId = null) {
         editingId = editId;
+        // Update the modal title based on whether we are editing or creating
         document.getElementById('transactionModalTitle').textContent = TRANSLATIONS[settings.language][editId ? 'editTransaction' : 'addTransaction'];
-        document.getElementById('transactionType').value = editId ? transactions.find(t => t.id === editId).type : 'expense';
-        document.getElementById('transactionAmount').value = editId ? transactions.find(t => t.id === editId).amount : '';
-        document.getElementById('transactionCategory').value = editId ? transactions.find(t => t.id === editId).category : 'food';
-        document.getElementById('transactionDesc').value = editId ? transactions.find(t => t.id === editId).description : '';
+        // Populate category options dynamically each time the modal opens
+        populateCategoryOptions();
+        // Prepopulate the type, amount, category and description fields
+        const tx = editId ? transactions.find(t => t.id === editId) : null;
+        document.getElementById('transactionType').value = tx ? tx.type : 'expense';
+        document.getElementById('transactionAmount').value = tx ? tx.amount : '';
+        // Determine the appropriate default category: use the transaction's
+        // existing category when editing, otherwise fall back to the first
+        // available category (if any)
+        let defaultCat = tx ? tx.category : (settings.categories && settings.categories.length ? settings.categories[0].id : '');
+        const catSelect = document.getElementById('transactionCategory');
+        if (catSelect) {
+          // If the default category is not present in the list (e.g. removed),
+          // select the first option
+          if (!Array.from(catSelect.options).some(o => o.value === defaultCat)) {
+            defaultCat = catSelect.options.length > 0 ? catSelect.options[0].value : '';
+          }
+          catSelect.value = defaultCat;
+        }
+        document.getElementById('transactionDesc').value = tx ? tx.description : '';
+        // Prepopulate the date field.  Use the transaction's date when
+        // editing; otherwise default to today.  Slice the ISO string
+        // to the first 10 characters (YYYY-MM-DD) required by
+        // <input type="date">.
+        const dateInput = document.getElementById('transactionDate');
+        if (dateInput) {
+          const isoStr = tx ? (tx.date || '').substring(0, 10) : new Date().toISOString().substring(0, 10);
+          dateInput.value = isoStr;
+        }
+
+        // Build icon options for the transaction modal.  Clear any previous
+        // selection and populate with all available icons.  When editing,
+        // preselect the transaction's existing icon if defined; otherwise
+        // default to the currently selected category's icon.  The
+        // selectedTransactionIcon variable is updated accordingly when
+        // the user clicks an option.
+        selectedTransactionIcon = null;
+        const iconContainer = document.getElementById('transactionIconOptions');
+        if (iconContainer) {
+          iconContainer.innerHTML = '';
+          // Determine the icon to preselect: use transaction's icon when
+          // editing, otherwise the current category's icon.  Fallback to
+          // null if metadata not available.
+          let preIcon = null;
+          if (tx && tx.icon) {
+            preIcon = tx.icon;
+          } else {
+            const currentCat = catSelect ? catSelect.value : defaultCat;
+            const metaCat = CATEGORY_META[currentCat];
+            preIcon = metaCat ? metaCat.icon : null;
+          }
+          ICON_OPTIONS_LIST.forEach(iconClass => {
+            const opt = document.createElement('div');
+            opt.className = 'icon-option';
+            opt.dataset.icon = iconClass;
+            opt.innerHTML = `<i class="fas ${iconClass}"></i>`;
+            opt.addEventListener('click', () => {
+              // Remove previously selected state
+              const siblings = iconContainer.querySelectorAll('.icon-option');
+              siblings.forEach(el => el.classList.remove('selected'));
+              opt.classList.add('selected');
+              selectedTransactionIcon = iconClass;
+            });
+            // Preselect if matching preIcon
+            if (preIcon && iconClass === preIcon) {
+              opt.classList.add('selected');
+              selectedTransactionIcon = preIcon;
+            }
+            iconContainer.appendChild(opt);
+          });
+        }
+        // Show the modal
         document.getElementById('transactionModal').classList.add('active');
       }
       function closeTransactionModal() {
         editingId = null;
         document.getElementById('transactionModal').classList.remove('active');
       }
+
+      // ---------------------- Category Modal Controls ----------------------
+      // Callback invoked after a new category is saved via the category modal.
+      // This allows the transaction category select to automatically select
+      // the newly created category once it has been added.  When no
+      // callback is provided, the modal simply closes without further
+      // action.
+      let categoryAddedCallback = null;
+      // Currently selected icon in the category modal.  Set when the
+      // user clicks an icon option.
+      let selectedIcon = null;
+
+      // Currently selected icon for the transaction modal.  This variable
+      // is reset each time the transaction modal opens and updated when
+      // the user selects an icon.  When creating a new transaction the
+      // default will fall back to the category's icon if none is chosen.
+      let selectedTransactionIcon = null;
+
+      /**
+       * Open the category modal.  Builds the icon picker dynamically
+       * from ICON_OPTIONS_LIST and clears previous selections.  Accepts
+       * an optional callback which receives the new category id when
+       * saved.  Without a callback, the modal will still function but
+       * the caller must refresh the category list manually.
+       * @param {Function|null} callback
+       */
+      function openCategoryModal(callback) {
+        categoryAddedCallback = callback || null;
+        selectedIcon = null;
+        // Reset the name input
+        const nameInput = document.getElementById('categoryNameInput');
+        if (nameInput) nameInput.value = '';
+        // Build icon options
+        const container = document.getElementById('iconOptions');
+        if (container) {
+          container.innerHTML = '';
+          ICON_OPTIONS_LIST.forEach(iconClass => {
+            const opt = document.createElement('div');
+            opt.className = 'icon-option';
+            opt.dataset.icon = iconClass;
+            opt.innerHTML = `<i class="fas ${iconClass}"></i>`;
+            opt.addEventListener('click', () => {
+              // remove selected from others
+              container.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
+              opt.classList.add('selected');
+              selectedIcon = iconClass;
+            });
+            container.appendChild(opt);
+          });
+        }
+        // Show the modal
+        document.getElementById('categoryModal').classList.add('active');
+      }
+      /**
+       * Close the category modal and reset the callback.  Does not
+       * persist any data.
+       */
+      function closeCategoryModal() {
+        const modal = document.getElementById('categoryModal');
+        if (modal) modal.classList.remove('active');
+        categoryAddedCallback = null;
+      }
+      /**
+       * Save a new category from the modal.  Validates the name and
+       * constructs a unique id, assigns a random colour and stores
+       * the new entry in settings.  Persists changes and triggers
+       * budgets and insights refresh.  Invokes the callback with
+       * the new category id if provided.
+       */
+      function handleCategorySave() {
+        const nameInput = document.getElementById('categoryNameInput');
+        const name = nameInput ? nameInput.value.trim() : '';
+        if (!name) {
+          const msg = settings.language === 'en' ? 'Enter category name' : 'Masukkan nama kategori';
+          openAlert(msg);
+          return;
+        }
+        let icon = selectedIcon;
+        if (!icon) {
+          icon = 'fa-tag';
+        }
+        // Generate unique id similar to addNewCategory()
+        const base = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        const baseId = base || 'custom';
+        let uniqueId = baseId;
+        let counter = 1;
+        while (settings.categories.some(c => c.id === uniqueId) || uniqueId === 'savings') {
+          uniqueId = `${baseId}_${counter++}`;
+        }
+        // Random colour palette
+        const palette = ['#f97316','#7c3aed','#eab308','#22c55e','#dc2626','#3b82f6','#fbbf24','#10b981','#f87171','#8b5cf6'];
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        const newCat = {
+          id: uniqueId,
+          name: { en: name, id: name },
+          icon: icon,
+          color: color,
+          budget: Infinity
+        };
+        settings.categories.push(newCat);
+        CATEGORY_META[uniqueId] = { name: { en: name, id: name }, icon: icon, color: color };
+        DEFAULT_BUDGETS[uniqueId] = Infinity;
+        settings.budgets[uniqueId] = Infinity;
+        saveSettings();
+        renderBudgets();
+        generateInsights();
+        updateSummary();
+        // Close the modal
+        closeCategoryModal();
+        // Invoke callback to let caller select this category
+        if (categoryAddedCallback) categoryAddedCallback(uniqueId);
+      }
       function openSettingsModal() {
         // Prefill settings inputs
         document.getElementById('userName').value = settings.name;
         document.getElementById('themeSelect').value = settings.theme;
         document.getElementById('languageSelect').value = settings.language;
-        // Generate budget inputs
+        // Generate budget inputs.  Iterate over the categories defined in
+        // user settings rather than the static CATEGORY_META list.  This
+        // allows budgets to be configured for custom categories.  The
+        // 'savings' category is excluded from editable budgets as it
+        // represents transfers into or out of savings goals rather than
+        // discretionary spending.
         const container = document.getElementById('budgetInputs');
         container.innerHTML = '';
-        Object.keys(CATEGORY_META).forEach(cat => {
+        const catsForBudget = (Array.isArray(settings.categories) ? settings.categories : []).filter(c => c.id !== 'savings');
+        catsForBudget.forEach(catObj => {
+          const cat = catObj.id;
           const label = document.createElement('label');
           label.className = 'form-label';
-          label.textContent = CATEGORY_META[cat].name[settings.language];
+          // Use the stored names for the current language.  If a
+          // translation is missing, fall back to the English name.
+          const meta = CATEGORY_META[cat] || { name: { en: catObj.name.en, id: catObj.name.id } };
+          label.textContent = meta.name[settings.language] || meta.name.en;
           const input = document.createElement('input');
           input.type = 'number';
           input.min = '0';
           input.className = 'form-input';
-          input.value = settings.budgets[cat] === Infinity ? '' : settings.budgets[cat];
-          input.placeholder = CATEGORY_META[cat].name[settings.language];
+          const rawVal = settings.budgets[cat];
+          input.value = (!rawVal || !isFinite(rawVal) || rawVal === Infinity) ? '' : rawVal;
+          input.placeholder = meta.name[settings.language] || meta.name.en;
           input.dataset.cat = cat;
           const group = document.createElement('div');
           group.className = 'form-group';
@@ -3376,6 +4206,29 @@ body.light .nav-overlay {
         });
       }
 
+      /**
+       * Hide a category from the budgets view.  This does not delete
+       * existing transactions or metadata; it simply sets a `hidden`
+       * flag on the category definition so that renderBudgets() filters
+       * it out.  After hiding a category the UI is refreshed to
+       * reflect the change.
+       *
+       * @param {string} cat the category identifier to hide
+       */
+      function deleteCategory(cat) {
+        const idx = settings.categories.findIndex(c => c.id === cat);
+        if (idx >= 0) {
+          settings.categories[idx].hidden = true;
+          saveSettings();
+          renderBudgets();
+          generateInsights();
+          updateSummary();
+          renderCharts();
+          repositionSavings();
+          updateBudgetVisibility();
+        }
+      }
+
       /* ----- Event Handlers ----- */
       function handleTransactionSave() {
         const type = document.getElementById('transactionType').value;
@@ -3393,10 +4246,38 @@ body.light .nav-overlay {
           openAlert(msg);
           return;
         }
-        if (editingId) {
-          updateTransaction(editingId, { type, amount, category, description: desc, date: new Date().toISOString() });
+        // Read date from input.  If no date is selected or invalid,
+        // default to the current date/time.  Convert to ISO string so
+        // that sorting and formatting remain consistent across browsers.
+        const dateVal = (document.getElementById('transactionDate') || {}).value;
+        let dateISO;
+        if (dateVal) {
+          // Use local date without time; convert to ISO by constructing
+          // a new Date in local timezone and capturing its full ISO.
+          const d = new Date(dateVal);
+          // If the date input returns an invalid date, fall back to now.
+          dateISO = isNaN(d) ? new Date().toISOString() : d.toISOString();
         } else {
-          const newTx = { id: Date.now().toString(), type, amount, category, description: desc, date: new Date().toISOString() };
+          dateISO = new Date().toISOString();
+        }
+        // Determine icon and colour.  When creating a new transaction, use
+        // the selected icon if provided, otherwise the category's default
+        // icon.  When editing, only update the icon when the user has
+        // explicitly selected a new icon; otherwise leave it untouched.
+        const metaForCat = CATEGORY_META[category] || {};
+        const defaultIcon = metaForCat.icon || 'fa-tag';
+        const defaultColor = metaForCat.color || '#6b7280';
+        if (editingId) {
+          const updateObj = { type, amount, category, description: desc, date: dateISO };
+          if (selectedTransactionIcon) {
+            updateObj.icon = selectedTransactionIcon;
+            updateObj.color = defaultColor;
+          }
+          updateTransaction(editingId, updateObj);
+        } else {
+          const txIcon = selectedTransactionIcon || defaultIcon;
+          const txColor = defaultColor;
+          const newTx = { id: Date.now().toString(), type, amount, category, description: desc, date: dateISO, icon: txIcon, color: txColor };
           addTransaction(newTx);
           checkAchievements(newTx);
         }
@@ -3429,47 +4310,52 @@ body.light .nav-overlay {
       }
       function initEventListeners() {
         // Quick action events
-        document.getElementById('quickAddExpense').addEventListener('click', () => openTransactionModal(null));
-        document.getElementById('quickAddIncome').addEventListener('click', () => {
-          openTransactionModal(null);
-          document.getElementById('transactionType').value = 'income';
-        });
-        document.getElementById('quickExport').addEventListener('click', () => {
-          // Ask the user which format to export.  If they confirm, a CSV
-          // file will be generated; otherwise, a JSON backup is created.
-          const msg = settings.language === 'en'
-            ? 'Export as CSV?\nClick Cancel for JSON.'
-            : 'Ekspor sebagai CSV?\nKlik Batal untuk JSON.';
-          const asCsv = confirm(msg);
-          if (asCsv) {
-            // Build CSV string with a header row.  Description fields are
-            // enclosed in double quotes and any quotes inside are
-            // doubled to escape them.  This allows spreadsheet
-            // applications to parse the file correctly.
-            let csv = 'id,type,amount,category,description,date\n';
-            transactions.forEach(tx => {
-              const desc = (tx.description || '').replace(/"/g, '""');
-              csv += `${tx.id},${tx.type},${tx.amount},${tx.category},"${desc}",${tx.date}\n`;
+        const qaExpenseBtn = document.getElementById('quickAddExpense');
+        if (qaExpenseBtn) {
+          qaExpenseBtn.addEventListener('click', () => {
+            // Require at least one user‑defined category (excluding savings)
+            const availableCats = (Array.isArray(settings.categories) ? settings.categories : []).filter(c => c.id !== 'savings' && !c.hidden);
+            if (!availableCats || availableCats.length === 0) {
+              openAlert(TRANSLATIONS[settings.language].noCategories);
+              return;
+            }
+            openTransactionModal(null);
+            // Ensure transaction type defaults to expense
+            const typeSelect = document.getElementById('transactionType');
+            if (typeSelect) typeSelect.value = 'expense';
+          });
+        }
+        const qaIncomeBtn = document.getElementById('quickAddIncome');
+        if (qaIncomeBtn) {
+          qaIncomeBtn.addEventListener('click', () => {
+            const availableCats = (Array.isArray(settings.categories) ? settings.categories : []).filter(c => c.id !== 'savings' && !c.hidden);
+            if (!availableCats || availableCats.length === 0) {
+              openAlert(TRANSLATIONS[settings.language].noCategories);
+              return;
+            }
+            openTransactionModal(null);
+            const typeSelect = document.getElementById('transactionType');
+            if (typeSelect) typeSelect.value = 'income';
+          });
+        }
+        // Add Category button: open the category modal so users can create
+        // a new transaction category even when no categories exist.  After
+        // a category is added, budgets and insights are refreshed.
+        const addCatBtn = document.getElementById('addCategoryBtn');
+        if (addCatBtn) {
+          addCatBtn.addEventListener('click', () => {
+            openCategoryModal((newId) => {
+              // Always repopulate category options and budgets after creating a new category
+              renderBudgets();
+              generateInsights();
+              updateSummary();
+              if (typeof populateCategoryOptions === 'function') populateCategoryOptions();
             });
-            const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'transactions.csv';
-            a.click();
-            URL.revokeObjectURL(url);
-          } else {
-            const data = JSON.stringify(transactions);
-            const blob = new Blob([data], { type:'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'transactions.json';
-            a.click();
-            URL.revokeObjectURL(url);
-          }
-        });
-        document.getElementById('quickSettings').addEventListener('click', openSettingsModal);
+          });
+        }
+        // Settings moved to navigation menu
+        const navSettingsBtn = document.getElementById('navSettings');
+        if (navSettingsBtn) navSettingsBtn.addEventListener('click', openSettingsModal);
         // The floating add button has been replaced by the navigation menu.  If it still exists, hide it.
         const floatBtn = document.getElementById('floatingAdd');
         if (floatBtn) {
@@ -3514,6 +4400,31 @@ body.light .nav-overlay {
         document.getElementById('settingsCancel').addEventListener('click', closeSettingsModal);
         document.getElementById('settingsSave').addEventListener('click', handleSettingsSave);
 
+        // When the category dropdown in the transaction modal changes,
+        // detect if the special "Add Category…" option was chosen.  In
+        // that case invoke `addNewCategory()` to create a custom
+        // category, repopulate the dropdown and select the newly created
+        // category.  If the user cancels the creation, reset the
+        // dropdown to the first available category.
+        const catSelect = document.getElementById('transactionCategory');
+        if (catSelect) {
+          catSelect.addEventListener('change', () => {
+            if (catSelect.value === '__add__') {
+              // Open the custom category modal instead of using prompt().
+              openCategoryModal((newId) => {
+                // Refresh the category list regardless so the special option stays at the end
+                populateCategoryOptions();
+                if (newId) {
+                  catSelect.value = newId;
+                } else {
+                  // If the user cancelled, select the first available option
+                  catSelect.value = catSelect.options.length > 0 ? catSelect.options[0].value : '';
+                }
+              });
+            }
+          });
+        }
+
         // Reset data button: clears all transactions and resets budgets.  Uses
         // the custom confirmation modal to avoid accidental data loss.
         const resetBtn = document.getElementById('resetDataBtn');
@@ -3523,9 +4434,17 @@ body.light .nav-overlay {
               ? 'Are you sure you want to reset all data? This will delete all transactions and restore default budgets.'
               : 'Anda yakin ingin menghapus semua data? Ini akan menghapus semua transaksi dan mengembalikan anggaran ke nilai awal.';
             showConfirm(msg, () => {
-              // Clear local transactions and reset budgets to defaults
+              // Clear local transactions
               transactions = [];
-              settings.budgets = { ...DEFAULT_BUDGETS };
+              // Reset budgets for each category.  Use the budget
+              // defined on the category object if present, otherwise
+              // default to Infinity.  This preserves any custom
+              // categories the user has added.
+              const newBudgets = {};
+              (Array.isArray(settings.categories) ? settings.categories : []).forEach(cat => {
+                newBudgets[cat.id] = (cat.budget !== undefined ? cat.budget : Infinity);
+              });
+              settings.budgets = newBudgets;
               saveTransactions();
               saveSettings();
               updateSummary();
@@ -3578,6 +4497,12 @@ body.light .nav-overlay {
         if (savingTransCancelBtn) savingTransCancelBtn.addEventListener('click', closeSavingTransModal);
         const savingTransSaveBtn = document.getElementById('savingTransSave');
         if (savingTransSaveBtn) savingTransSaveBtn.addEventListener('click', handleSavingTransSave);
+
+        // Category modal buttons
+        const categoryCancelBtn = document.getElementById('categoryCancel');
+        if (categoryCancelBtn) categoryCancelBtn.addEventListener('click', closeCategoryModal);
+        const categorySaveBtn = document.getElementById('categorySave');
+        if (categorySaveBtn) categorySaveBtn.addEventListener('click', handleCategorySave);
         // Clicking outside modal closes it
         document.querySelectorAll('.modal').forEach(modal => {
           modal.addEventListener('click', e => {
@@ -3669,7 +4594,13 @@ body.light .nav-overlay {
           document.querySelectorAll('.nav-item').forEach(btn => {
             btn.addEventListener('click', () => {
               const target = btn.getAttribute('data-target');
-              if (typeof navigateTo === 'function') navigateTo(target);
+              // If the nav item has a target, navigate to that page.  If
+              // it has no target (e.g. settings button), open the settings modal.
+              if (target) {
+                if (typeof navigateTo === 'function') navigateTo(target);
+              } else if (btn.id === 'navSettings') {
+                openSettingsModal();
+              }
               navMenu.classList.remove('open');
               navOverlay.classList.remove('show');
             });
@@ -3716,6 +4647,11 @@ body.light .nav-overlay {
         if (typeof repositionSavings === 'function') repositionSavings();
         if (typeof updateBudgetVisibility === 'function') updateBudgetVisibility();
         initEventListeners();
+        // Populate the transaction category dropdown on initial load so
+        // that it reflects any custom categories already saved by the
+        // user.  Without this call, the select element would still
+        // contain the static options defined in the HTML.
+        populateCategoryOptions();
         // Update greeting every minute
         setInterval(updateGreeting, 60000);
         // If no user or guest session, prompt login
@@ -4022,7 +4958,8 @@ body.light .nav-overlay {
         renderBalanceTrendChart();
         // Render a rolling six‑month summary comparing income and expense
         renderMonthlySummaryChart();
-        renderEstimation();
+        // After rendering all charts, generate AI analysis for the charts page.
+        generateChartAnalysis();
       }
       function renderIncomeExpenseChart() {
         // Compute monthly income and expense for current month
@@ -4337,6 +5274,129 @@ body.light .nav-overlay {
         const projectedBalance = cumulativeBalance + (projectedNet - net);
         const estEl = document.getElementById('estimationText');
         estEl.textContent = `${settings.language === 'en' ? 'Estimated end of month balance' : 'Perkiraan saldo akhir bulan'}: ${formatCurrency(projectedBalance)}`;
+      }
+
+      /**
+       * Generate AI‑driven financial analysis for the charts page.
+       * This function summarises current month income, expenses and
+       * category patterns.  It produces an array of insights with an
+       * associated icon type for styling.  The messages adapt based
+       * on the user’s language setting.  Called after rendering
+       * charts.
+       */
+      function generateChartAnalysis() {
+        const container = document.getElementById('analysisList');
+        if (!container) return;
+        container.innerHTML = '';
+        const t = TRANSLATIONS[settings.language];
+        const now = new Date();
+        const month = now.getMonth();
+        const year = now.getFullYear();
+        let totalIncome = 0;
+        let totalExpense = 0;
+        const expenseByCategory = {};
+        // Sum income and expenses for current month
+        transactions.forEach(tx => {
+          const d = new Date(tx.date);
+          if (d.getMonth() === month && d.getFullYear() === year) {
+            if (tx.type === 'income') {
+              totalIncome += tx.amount;
+            } else if (tx.type === 'expense') {
+              totalExpense += tx.amount;
+              expenseByCategory[tx.category] = (expenseByCategory[tx.category] || 0) + tx.amount;
+            }
+          }
+        });
+        const net = totalIncome - totalExpense;
+        // Determine top spending category
+        let topCat = null;
+        let topAmt = 0;
+        Object.keys(expenseByCategory).forEach(cat => {
+          if (expenseByCategory[cat] > topAmt) {
+            topAmt = expenseByCategory[cat];
+            topCat = cat;
+          }
+        });
+        // Determine budgets nearing limit or exceeded
+        const budgetWarnings = [];
+        (Array.isArray(settings.categories) ? settings.categories : []).forEach(catObj => {
+          if (catObj.id === 'savings' || catObj.hidden) return;
+          const cat = catObj.id;
+          const budget = settings.budgets[cat] === undefined ? DEFAULT_BUDGETS[cat] : settings.budgets[cat];
+          // Skip categories with unlimited budgets
+          if (budget === Infinity) return;
+          const spent = expenseByCategory[cat] || 0;
+          const ratio = budget > 0 ? spent / budget : 0;
+          if (ratio >= 1) {
+            budgetWarnings.push({ cat, type: 'over', overAmount: spent - budget });
+          } else if (ratio >= 0.8) {
+            budgetWarnings.push({ cat, type: 'near', overAmount: budget - spent });
+          }
+        });
+        // Build insights array
+        const insights = [];
+        if (totalIncome === 0 && totalExpense === 0) {
+          insights.push({ iconClass: 'fa-info-circle', bgClass: 'trend-icon-small', text: t.noChartsData });
+        } else {
+          // Net balance insight
+          insights.push({
+            iconClass: net >= 0 ? 'fa-check-circle' : 'fa-exclamation-triangle',
+            bgClass: net >= 0 ? 'tip-icon' : 'warning-icon',
+            text: settings.language === 'en'
+              ? `Net balance this month: ${formatCurrency(net)}.`
+              : `Saldo bersih bulan ini: ${formatCurrency(net)}.`
+          });
+          // Income vs expense
+          insights.push({
+            iconClass: totalIncome >= totalExpense ? 'fa-arrow-up' : 'fa-arrow-down',
+            bgClass: totalIncome >= totalExpense ? 'tip-icon' : 'warning-icon',
+            text: settings.language === 'en'
+              ? `Income: ${formatCurrency(totalIncome)}, expenses: ${formatCurrency(totalExpense)}.`
+              : `Pemasukan: ${formatCurrency(totalIncome)}, pengeluaran: ${formatCurrency(totalExpense)}.`
+          });
+          // Top spending category
+          if (topCat) {
+            const meta = CATEGORY_META[topCat];
+            insights.push({
+              iconClass: 'fa-chart-pie',
+              bgClass: 'trend-icon-small',
+              text: settings.language === 'en'
+                ? `Highest spending in ${meta.name.en}: ${formatCurrency(topAmt)}.`
+                : `Pengeluaran terbesar pada ${meta.name.id}: ${formatCurrency(topAmt)}.`
+            });
+          }
+          // Budget warnings
+          budgetWarnings.forEach(w => {
+            const meta = CATEGORY_META[w.cat];
+            if (w.type === 'over') {
+              insights.push({
+                iconClass: 'fa-bell',
+                bgClass: 'warning-icon',
+                text: settings.language === 'en'
+                  ? `You have exceeded your ${meta.name.en} budget by ${formatCurrency(w.overAmount)}.`
+                  : `Anda telah melebihi anggaran ${meta.name.id} sebesar ${formatCurrency(w.overAmount)}.`
+              });
+            } else if (w.type === 'near') {
+              insights.push({
+                iconClass: 'fa-exclamation-circle',
+                bgClass: 'warning-icon',
+                text: settings.language === 'en'
+                  ? `You are close to reaching your ${meta.name.en} budget.`
+                  : `Anda hampir mencapai anggaran ${meta.name.id}.`
+              });
+            }
+          });
+        }
+        // Render insights
+        insights.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'analysis-item';
+          div.innerHTML = `
+            <div class="analysis-icon ${item.bgClass}"><i class="fas ${item.iconClass}"></i></div>
+            <div class="analysis-text">${item.text}</div>
+          `;
+          container.appendChild(div);
+        });
       }
     })();
   </script>
